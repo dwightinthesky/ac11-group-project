@@ -673,6 +673,9 @@
   padding: 13px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fcff 100%);
   box-shadow: var(--shadow-md);
+  min-height: 196px;
+  display: flex;
+  flex-direction: column;
   transition:
     transform 0.22s var(--ease-out-quart),
     box-shadow 0.22s var(--ease-out-quart),
@@ -708,11 +711,13 @@
   font-size: 1.34rem;
   font-weight: 800;
   letter-spacing: -0.02em;
+  line-height: 1.14;
   color: #173f6b;
 }
 
 .metric-card__sub {
-  margin: 7px 0 0;
+  margin: auto 0 0;
+  padding-top: 10px;
   font-size: 0.76rem;
   line-height: 1.45;
   color: #52749f;

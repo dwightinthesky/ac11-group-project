@@ -754,9 +754,9 @@ export default function App() {
                 icon={DollarSign}
                 tone={calculations.ebitAbsorption >= 0 ? 'good' : 'bad'}
                 value={formatCurrency(calculations.ebitAbsorption)}
-                sub={`Gross profit ${formatCurrency(calculations.grossProfit)} - fixed operating ${formatCurrency(
-                  annualFixedOperating
-                )} - depreciation ${formatCurrency(annualDepreciation)}`}
+                sub={`Gross ${formatCurrency(calculations.grossProfit)} | Fixed+Dep ${formatCurrency(
+                  calculations.fixedAbsorption
+                )}`}
               />
 
               <MetricCard
@@ -776,7 +776,7 @@ export default function App() {
                 icon={LineChart}
                 tone={calculations.estimatedNetAfterInterest >= 0 ? 'good' : 'warn'}
                 value={formatCurrency(calculations.estimatedNetAfterInterest)}
-                sub={`EBIT ${formatCurrency(calculations.ebitAbsorption)} - loan interest ${formatCurrency(
+                sub={`EBIT ${formatCurrency(calculations.ebitAbsorption)} | Interest ${formatCurrency(
                   annualInterest
                 )}`}
               />
