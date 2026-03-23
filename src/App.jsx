@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import {
   TrendingUp,
   AlertCircle,
@@ -8,6 +8,7 @@ import {
   Settings,
   BarChart2,
 } from 'lucide-react';
+import './App.css';
 
 export default function App() {
   // Initial state (based on source case assumptions)
@@ -44,6 +45,40 @@ export default function App() {
       targetUnits,
     };
   }, [price, vc, fc, volume, targetProfit]);
+
+  useEffect(() => {
+    const revealNodes = Array.from(document.querySelectorAll('[data-reveal]'));
+    if (revealNodes.length === 0) return undefined;
+
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
+
+    if (prefersReducedMotion) {
+      revealNodes.forEach((node) => node.classList.add('is-visible'));
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -8% 0px' }
+    );
+
+    revealNodes.forEach((node, idx) => {
+      const order = Number(node.getAttribute('data-reveal') ?? idx);
+      node.style.setProperty('--reveal-delay', `${Math.min(order * 90, 720)}ms`);
+      observer.observe(node);
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   // Number formatting helpers
   const formatCurrency = (num) => {
@@ -97,12 +132,15 @@ export default function App() {
     };
 
     const isBepValid = calculations.bepUnits > 0 && calculations.bepUnits <= maxVolumeX * 1.5;
+    const lineLength = (line) => Math.hypot(line.x2 - line.x1, line.y2 - line.y1);
+    const revenueLen = lineLength(revenueLine);
+    const costLen = lineLength(costLine);
 
     return (
       <div className="w-full overflow-x-auto">
         <svg
           viewBox={`0 0 ${width} ${height}`}
-          className="mx-auto h-auto w-full max-w-2xl font-sans drop-shadow-sm"
+          className="cvp-chart mx-auto h-auto w-full max-w-2xl font-sans drop-shadow-sm"
         >
           {/* Background grid (Y) */}
           {[0, 0.25, 0.5, 0.75, 1].map((ratio, i) => (
@@ -189,7 +227,13 @@ export default function App() {
           </text>
 
           {/* Fixed cost line */}
-          <line {...fcLine} stroke="#9ca3af" strokeWidth="2" strokeDasharray="5 5" />
+          <line
+            {...fcLine}
+            className="chart-fixed-line"
+            stroke="#9ca3af"
+            strokeWidth="2"
+            strokeDasharray="5 5"
+          />
           <text
             x={width - padding.right - 60}
             y={fcLine.y1 - 10}
@@ -200,7 +244,13 @@ export default function App() {
           </text>
 
           {/* Total cost line */}
-          <line {...costLine} stroke="#ef4444" strokeWidth="3" />
+          <line
+            {...costLine}
+            className="chart-line chart-line--cost"
+            style={{ '--path-length': costLen }}
+            stroke="#ef4444"
+            strokeWidth="3"
+          />
           <text
             x={width - padding.right - 50}
             y={costLine.y2 - 10}
@@ -212,7 +262,13 @@ export default function App() {
           </text>
 
           {/* Total revenue line */}
-          <line {...revenueLine} stroke="#22c55e" strokeWidth="3" />
+          <line
+            {...revenueLine}
+            className="chart-line chart-line--revenue"
+            style={{ '--path-length': revenueLen }}
+            stroke="#22c55e"
+            strokeWidth="3"
+          />
           <text
             x={width - padding.right - 50}
             y={revenueLine.y2 - 10}
@@ -229,6 +285,7 @@ export default function App() {
             y1={padding.top}
             x2={scaleX(volume)}
             y2={height - padding.bottom}
+            className="chart-marker-line"
             stroke="#3b82f6"
             strokeWidth="2"
             strokeDasharray="4 4"
@@ -237,6 +294,7 @@ export default function App() {
           <circle
             cx={scaleX(volume)}
             cy={scaleY(calculations.ebit > 0 ? calculations.revenue : calculations.totalCost)}
+            className="chart-marker-dot"
             r="4"
             fill="#3b82f6"
           />
@@ -247,6 +305,7 @@ export default function App() {
               <circle
                 cx={scaleX(calculations.bepUnits)}
                 cy={scaleY(calculations.bepRevenue)}
+                className="chart-bep-dot"
                 r="6"
                 fill="#f59e0b"
                 stroke="#fff"
@@ -255,6 +314,7 @@ export default function App() {
               <text
                 x={scaleX(calculations.bepUnits)}
                 y={scaleY(calculations.bepRevenue) - 15}
+                className="chart-bep-label"
                 textAnchor="middle"
                 fontSize="12"
                 fill="#d97706"
@@ -270,16 +330,19 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 font-sans text-gray-800 md:p-8">
+    <div className="cvp-shell min-h-screen p-4 font-sans text-gray-800 md:p-8">
       <div className="mx-auto max-w-6xl space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+        <div
+          className="interactive-panel reveal flex items-center justify-between rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
+          data-reveal="0"
+        >
           <div>
             <h1 className="flex items-center gap-3 text-2xl font-bold text-gray-900 md:text-3xl">
               <Activity className="text-blue-600" />
               Fly Ash Brick Project CVP Interactive Analyzer
             </h1>
-            <p className="mt-2 text-gray-500">
+            <p className="hero-subtle mt-2 text-gray-500">
               Simulate how changes in price, cost, and sales volume affect profit and break-even in real time.
             </p>
           </div>
@@ -288,7 +351,10 @@ export default function App() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
           {/* Left: Controls */}
           <div className="space-y-6 lg:col-span-4">
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <div
+              className="interactive-panel reveal rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
+              data-reveal="1"
+            >
               <h2 className="mb-4 flex items-center gap-2 border-b pb-2 text-lg font-bold">
                 <Settings className="h-5 w-5 text-gray-500" /> Parameter Settings
               </h2>
@@ -307,7 +373,7 @@ export default function App() {
                     step="0.1"
                     value={price}
                     onChange={(e) => setPrice(Number(e.target.value))}
-                    className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-blue-600"
+                    className="slider-input h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-blue-600"
                   />
                 </div>
 
@@ -324,7 +390,7 @@ export default function App() {
                     step="0.1"
                     value={vc}
                     onChange={(e) => setVc(Number(e.target.value))}
-                    className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-red-500"
+                    className="slider-input h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-red-500"
                   />
                 </div>
 
@@ -341,7 +407,7 @@ export default function App() {
                     step="100000"
                     value={fc}
                     onChange={(e) => setFc(Number(e.target.value))}
-                    className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-orange-500"
+                    className="slider-input h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-orange-500"
                   />
                 </div>
 
@@ -358,7 +424,7 @@ export default function App() {
                     step="50000"
                     value={volume}
                     onChange={(e) => setVolume(Number(e.target.value))}
-                    className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-indigo-600"
+                    className="slider-input h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-indigo-600"
                   />
                 </div>
 
@@ -377,7 +443,7 @@ export default function App() {
                     step="100000"
                     value={targetProfit}
                     onChange={(e) => setTargetProfit(Number(e.target.value))}
-                    className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-emerald-600"
+                    className="slider-input h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 accent-emerald-600"
                   />
                 </div>
               </div>
@@ -389,11 +455,12 @@ export default function App() {
             {/* KPI cards */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div
-                className={`rounded-2xl border p-4 ${
+                className={`interactive-card reveal rounded-2xl border p-4 ${
                   calculations.ebit >= 0
                     ? 'border-green-200 bg-green-50'
                     : 'border-red-200 bg-red-50'
                 }`}
+                data-reveal="2"
               >
                 <div className="mb-2 flex items-center gap-2">
                   <DollarSign
@@ -406,7 +473,7 @@ export default function App() {
                   </h3>
                 </div>
                 <p
-                  className={`text-2xl font-black ${
+                  className={`kpi-value text-2xl font-black ${
                     calculations.ebit >= 0 ? 'text-green-700' : 'text-red-700'
                   }`}
                 >
@@ -419,14 +486,17 @@ export default function App() {
                 )}
               </div>
 
-              <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+              <div
+                className="interactive-card reveal rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
+                data-reveal="3"
+              >
                 <div className="mb-2 flex items-center gap-2">
                   <Activity className="h-5 w-5 text-orange-500" />
                   <h3 className="text-sm font-semibold text-gray-700">
                     Break-Even Point (BEP Volume)
                   </h3>
                 </div>
-                <p className="text-2xl font-black text-gray-900">
+                <p className="kpi-value text-2xl font-black text-gray-900">
                   {formatNumber(calculations.bepUnits)}{' '}
                   <span className="text-sm font-normal text-gray-500">blocks</span>
                 </p>
@@ -435,14 +505,17 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+              <div
+                className="interactive-card reveal rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
+                data-reveal="4"
+              >
                 <div className="mb-2 flex items-center gap-2">
                   <Target className="h-5 w-5 text-emerald-500" />
                   <h3 className="text-sm font-semibold text-gray-700">
                     Units Needed for Target Profit
                   </h3>
                 </div>
-                <p className="text-2xl font-black text-gray-900">
+                <p className="kpi-value text-2xl font-black text-gray-900">
                   {formatNumber(calculations.targetUnits)}{' '}
                   <span className="text-sm font-normal text-gray-500">blocks</span>
                 </p>
@@ -454,14 +527,17 @@ export default function App() {
                 )}
               </div>
 
-              <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
+              <div
+                className="interactive-card reveal rounded-2xl border border-gray-100 bg-white p-4 shadow-sm"
+                data-reveal="5"
+              >
                 <div className="mb-2 flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-blue-500" />
                   <h3 className="text-sm font-semibold text-gray-700">
                     Contribution Margin Ratio (CM Ratio)
                   </h3>
                 </div>
-                <p className="text-2xl font-black text-gray-900">
+                <p className="kpi-value text-2xl font-black text-gray-900">
                   {calculations.cmRatio.toFixed(2)}%
                 </p>
                 <p className="mt-1 text-xs text-gray-500">
@@ -471,7 +547,10 @@ export default function App() {
             </div>
 
             {/* CVP chart */}
-            <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
+            <div
+              className="interactive-panel reveal rounded-2xl border border-gray-100 bg-white p-6 shadow-sm"
+              data-reveal="6"
+            >
               <h2 className="mb-6 flex items-center gap-2 text-lg font-bold">
                 <BarChart2 className="h-5 w-5 text-gray-500" /> CVP Chart
                 (Cost-Volume-Profit)
