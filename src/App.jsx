@@ -1,5 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import {
+  Activity,
   AlertCircle,
   ArrowRight,
   BarChart2,
@@ -9,6 +10,8 @@ import {
   Gauge,
   LineChart,
   Lightbulb,
+  Rocket,
+  ShieldCheck,
   Target,
   TrendingUp,
 } from 'lucide-react';
@@ -282,7 +285,7 @@ export default function App() {
     const bepY = isBepVisible ? scaleY(calculations.bepRevenue) : null;
 
     return (
-      <div className="chart-wrap" data-reveal="8">
+      <div className="chart-wrap" data-reveal="9">
         <svg viewBox={`0 0 ${width} ${height}`} className="cvp-chart" role="img" aria-label="CVP chart">
           <defs>
             <linearGradient id="rev-grad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -451,35 +454,60 @@ export default function App() {
       <div className="studio-noise" />
 
       <main className="studio-main">
-        <header className="hero-panel reveal" data-reveal="0">
-          <div className="hero-title-wrap">
-            <p className="hero-eyebrow">Case-Based Decision Dashboard</p>
-            <h1>
-              Fly Ash Brick
-              <span>Feasibility Studio</span>
-            </h1>
-            <p className="hero-subtext">
-              Fully aligned with the PDF assignment and rebuilt with a bolder interface.
-              Every output below maps directly to Q1 to Q7.
-            </p>
+        <header className="topbar reveal" data-reveal="0">
+          <div className="topbar-brand">
+            <span className="topbar-logo">
+              <Activity size={18} />
+            </span>
+            <div>
+              <p>ac11-group-project</p>
+              <strong>Fly Ash Brick Profit Intelligence</strong>
+            </div>
           </div>
-          <div className="hero-stats">
-            <div>
-              <span>Capacity</span>
-              <strong>{formatNumber(CASE.capacityUnits)}</strong>
-            </div>
-            <div>
-              <span>Baseline Sales</span>
-              <strong>{formatNumber(CASE.baselineVolume)}</strong>
-            </div>
-            <div>
-              <span>Project Life</span>
-              <strong>{CASE.projectLifeYears} Years</strong>
-            </div>
+          <div className="topbar-tags">
+            <span>Mixpanel-inspired UI</span>
+            <span>Assignment Q1-Q7 mapped</span>
+            <span>Interactive sensitivity model</span>
           </div>
         </header>
 
-        <section className="assignment-strip reveal" data-reveal="1">
+        <section className="hero-panel reveal" data-reveal="1">
+          <div className="hero-title-wrap">
+            <p className="hero-eyebrow">Case-Based Decision Workspace</p>
+            <h1>
+              Fly Ash Brick
+              <span>Profitability Navigator</span>
+            </h1>
+            <p className="hero-subtext">
+              A high-clarity operating dashboard designed to answer every assignment
+              requirement while feeling like a modern analytics product.
+            </p>
+            <div className="hero-flags">
+              <span>
+                <ShieldCheck size={14} /> Formula-accurate case outputs
+              </span>
+              <span>
+                <Rocket size={14} /> Bold UX with clear executive storytelling
+              </span>
+            </div>
+          </div>
+          <div className="hero-stats">
+            <div>
+              <span>Plant Capacity</span>
+              <strong>{formatNumber(CASE.capacityUnits)}</strong>
+            </div>
+            <div>
+              <span>Baseline Annual Volume</span>
+              <strong>{formatNumber(CASE.baselineVolume)}</strong>
+            </div>
+            <div>
+              <span>Project Horizon</span>
+              <strong>{CASE.projectLifeYears} Years</strong>
+            </div>
+          </div>
+        </section>
+
+        <section className="assignment-strip reveal" data-reveal="2">
           <h2>
             <CheckCircle2 size={18} /> Assignment Coverage
           </h2>
@@ -494,7 +522,7 @@ export default function App() {
         </section>
 
         <div className="layout-grid">
-          <aside className="control-panel reveal" data-reveal="2">
+          <aside className="control-panel reveal" data-reveal="3">
             <div className="panel-header">
               <h3>
                 <Gauge size={18} /> Assumption Controls
@@ -593,7 +621,7 @@ export default function App() {
           </aside>
 
           <section className="results-column">
-            <section className="section-card reveal" data-reveal="3">
+            <section className="section-card reveal" data-reveal="4">
               <header>
                 <h2>
                   <Factory size={18} /> Q1. Cost Classification and Gross Profit (Year 1)
@@ -680,7 +708,7 @@ export default function App() {
 
             <div className="metric-grid">
               <MetricCard
-                revealIndex={4}
+                revealIndex={5}
                 title="Q2. EBIT (Absorption)"
                 icon={DollarSign}
                 tone={calculations.ebitAbsorption >= 0 ? 'good' : 'bad'}
@@ -691,7 +719,7 @@ export default function App() {
               />
 
               <MetricCard
-                revealIndex={5}
+                revealIndex={6}
                 title="Q3. Contribution Margin"
                 icon={TrendingUp}
                 tone="default"
@@ -702,7 +730,7 @@ export default function App() {
               />
 
               <MetricCard
-                revealIndex={6}
+                revealIndex={7}
                 title="Additional: Net after Interest"
                 icon={LineChart}
                 tone={calculations.estimatedNetAfterInterest >= 0 ? 'good' : 'warn'}
@@ -713,7 +741,7 @@ export default function App() {
               />
             </div>
 
-            <section className="section-card reveal" data-reveal="7">
+            <section className="section-card reveal" data-reveal="8">
               <header>
                 <h2>
                   <BarChart2 size={18} /> Q4. Break-Even + CVP Graph
@@ -741,7 +769,7 @@ export default function App() {
               <CVPChart />
             </section>
 
-            <section className="section-card reveal" data-reveal="9">
+            <section className="section-card reveal" data-reveal="10">
               <header>
                 <h2>
                   <Target size={18} /> Q5. Units Required for Target Income
@@ -763,7 +791,7 @@ export default function App() {
               </div>
             </section>
 
-            <section className="section-card reveal" data-reveal="10">
+            <section className="section-card reveal" data-reveal="11">
               <header>
                 <h2>
                   <Lightbulb size={18} /> Q6 + Q7. Owner Advice and Final Reasoning
@@ -818,7 +846,7 @@ export default function App() {
           </section>
         </div>
 
-        <footer className="studio-footer reveal" data-reveal="11">
+        <footer className="studio-footer reveal" data-reveal="12">
           <AlertCircle size={16} />
           <span>
             This dashboard uses the case exhibits for fixed/variable classification and adds sensitivity controls for managerial decision testing.
