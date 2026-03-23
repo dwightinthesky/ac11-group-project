@@ -231,7 +231,7 @@ export default function App() {
     setAnnualFixedOperating(fixedMonthlyTotal * 12);
   };
 
-  const CVPChart = () => {
+  const renderCVPChart = () => {
     const maxVolumeX = CASE.capacityUnits;
     const maxY = Math.max(
       price * maxVolumeX,
@@ -285,16 +285,16 @@ export default function App() {
     const bepY = isBepVisible ? scaleY(calculations.bepRevenue) : null;
 
     return (
-      <div className="chart-wrap" data-reveal="9">
+      <div className="chart-wrap" data-reveal="10">
         <svg viewBox={`0 0 ${width} ${height}`} className="cvp-chart" role="img" aria-label="CVP chart">
           <defs>
             <linearGradient id="rev-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#0f766e" />
-              <stop offset="100%" stopColor="#14b8a6" />
+              <stop offset="0%" stopColor="#2f6cff" />
+              <stop offset="100%" stopColor="#10bda6" />
             </linearGradient>
             <linearGradient id="cost-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#ef4444" />
-              <stop offset="100%" stopColor="#f97316" />
+              <stop offset="0%" stopColor="#ef4e4e" />
+              <stop offset="100%" stopColor="#ff9f5b" />
             </linearGradient>
           </defs>
 
@@ -305,7 +305,7 @@ export default function App() {
                 y1={padding.top + innerHeight * ratio}
                 x2={width - padding.right}
                 y2={padding.top + innerHeight * ratio}
-                stroke="#d6d3d1"
+                stroke="#dfebfa"
                 strokeWidth="1"
               />
               <text
@@ -313,7 +313,7 @@ export default function App() {
                 y={padding.top + innerHeight * ratio + 4}
                 textAnchor="end"
                 fontSize="10"
-                fill="#57534e"
+                fill="#5c77a0"
               >
                 {(maxY * (1 - ratio) / 1000000).toFixed(1)}M
               </text>
@@ -327,7 +327,7 @@ export default function App() {
                 y1={padding.top}
                 x2={padding.left + innerWidth * ratio}
                 y2={height - padding.bottom}
-                stroke="#e7e5e4"
+                stroke="#e7f0fb"
                 strokeWidth="1"
                 strokeDasharray="4 4"
               />
@@ -336,7 +336,7 @@ export default function App() {
                 y={height - padding.bottom + 22}
                 textAnchor="middle"
                 fontSize="10"
-                fill="#57534e"
+                fill="#5c77a0"
               >
                 {(maxVolumeX * ratio / 1000000).toFixed(1)}M
               </text>
@@ -348,7 +348,7 @@ export default function App() {
             y1={padding.top}
             x2={padding.left}
             y2={height - padding.bottom}
-            stroke="#292524"
+            stroke="#2a4d7a"
             strokeWidth="2"
           />
           <line
@@ -356,21 +356,21 @@ export default function App() {
             y1={height - padding.bottom}
             x2={width - padding.right}
             y2={height - padding.bottom}
-            stroke="#292524"
+            stroke="#2a4d7a"
             strokeWidth="2"
           />
 
-          <text x={padding.left - 50} y={padding.top - 8} fontSize="11" fill="#292524" fontWeight="700">
+          <text x={padding.left - 50} y={padding.top - 8} fontSize="11" fill="#244a76" fontWeight="700">
             Amount (Rs)
           </text>
-          <text x={width - padding.right - 8} y={height - padding.bottom + 36} fontSize="11" fill="#292524" textAnchor="end" fontWeight="700">
+          <text x={width - padding.right - 8} y={height - padding.bottom + 36} fontSize="11" fill="#244a76" textAnchor="end" fontWeight="700">
             Annual output (bricks)
           </text>
 
           <line
             {...fixedLine}
             className="chart-fixed-line"
-            stroke="#78716c"
+            stroke="#90a6c7"
             strokeWidth="2"
             strokeDasharray="7 5"
           />
@@ -397,7 +397,7 @@ export default function App() {
             x2={scaleX(volume)}
             y2={height - padding.bottom}
             className="chart-marker-line"
-            stroke="#2563eb"
+            stroke="#2f6cff"
             strokeWidth="2"
             strokeDasharray="5 4"
           />
@@ -407,7 +407,7 @@ export default function App() {
             cy={scaleY(Math.max(currentRevenueY, currentCostY))}
             className="chart-marker-dot"
             r="5"
-            fill="#2563eb"
+            fill="#2f6cff"
           />
 
           {isBepVisible && (
@@ -417,7 +417,7 @@ export default function App() {
                 cy={bepY}
                 r="7"
                 className="chart-bep-dot"
-                fill="#f59e0b"
+                fill="#f59f0a"
                 stroke="#fff"
                 strokeWidth="2"
               />
@@ -427,7 +427,7 @@ export default function App() {
                 className="chart-bep-label"
                 textAnchor="middle"
                 fontSize="12"
-                fill="#b45309"
+                fill="#b06b00"
                 fontWeight="700"
               >
                 BEP
@@ -449,6 +449,36 @@ export default function App() {
     'Q7 Financial + non-financial reasoning',
   ];
 
+  const snapshotCards = [
+    {
+      label: 'Expected EBIT',
+      value: formatCurrency(calculations.ebitAbsorption),
+      note: calculations.ebitAbsorption >= 0 ? 'Profitable under absorption costing' : 'Negative EBIT risk',
+      tone: calculations.ebitAbsorption >= 0 ? 'good' : 'bad',
+    },
+    {
+      label: 'Break-even Output',
+      value: `${formatNumber(calculations.bepUnits)} units`,
+      note: `${formatPct(calculations.capacityForBep)} of annual capacity`,
+      tone: 'neutral',
+    },
+    {
+      label: 'Contribution Margin',
+      value: `${formatCurrency(calculations.cmUnit)} / unit`,
+      note: `${formatPct(calculations.cmRatio)} contribution ratio`,
+      tone: 'neutral',
+    },
+    {
+      label: 'Target Feasibility',
+      value:
+        calculations.targetUnits <= CASE.capacityUnits
+          ? 'Capacity fit'
+          : 'Capacity exceeded',
+      note: `${formatNumber(calculations.targetUnits)} units needed for Rs ${formatNumber(targetProfit)}`,
+      tone: calculations.targetUnits <= CASE.capacityUnits ? 'good' : 'warn',
+    },
+  ];
+
   return (
     <div className="studio-shell">
       <div className="studio-noise" />
@@ -465,7 +495,7 @@ export default function App() {
             </div>
           </div>
           <div className="topbar-tags">
-            <span>Mixpanel-inspired UI</span>
+            <span>Master SaaS Visual Language</span>
             <span>Assignment Q1-Q7 mapped</span>
             <span>Interactive sensitivity model</span>
           </div>
@@ -479,8 +509,9 @@ export default function App() {
               <span>Profitability Navigator</span>
             </h1>
             <p className="hero-subtext">
-              A high-clarity operating dashboard designed to answer every assignment
-              requirement while feeling like a modern analytics product.
+              Premium decision intelligence for pricing, cost and volume simulation.
+              The full interface is engineered to present assignment-grade answers in a
+              boardroom-ready SaaS experience.
             </p>
             <div className="hero-flags">
               <span>
@@ -507,7 +538,17 @@ export default function App() {
           </div>
         </section>
 
-        <section className="assignment-strip reveal" data-reveal="2">
+        <section className="executive-grid reveal" data-reveal="2">
+          {snapshotCards.map((card) => (
+            <article key={card.label} className={`executive-card executive-card--${card.tone}`}>
+              <span>{card.label}</span>
+              <strong>{card.value}</strong>
+              <small>{card.note}</small>
+            </article>
+          ))}
+        </section>
+
+        <section className="assignment-strip reveal" data-reveal="3">
           <h2>
             <CheckCircle2 size={18} /> Assignment Coverage
           </h2>
@@ -522,7 +563,7 @@ export default function App() {
         </section>
 
         <div className="layout-grid">
-          <aside className="control-panel reveal" data-reveal="3">
+          <aside className="control-panel reveal" data-reveal="4">
             <div className="panel-header">
               <h3>
                 <Gauge size={18} /> Assumption Controls
@@ -621,7 +662,7 @@ export default function App() {
           </aside>
 
           <section className="results-column">
-            <section className="section-card reveal" data-reveal="4">
+            <section className="section-card reveal" data-reveal="5">
               <header>
                 <h2>
                   <Factory size={18} /> Q1. Cost Classification and Gross Profit (Year 1)
@@ -708,7 +749,7 @@ export default function App() {
 
             <div className="metric-grid">
               <MetricCard
-                revealIndex={5}
+                revealIndex={6}
                 title="Q2. EBIT (Absorption)"
                 icon={DollarSign}
                 tone={calculations.ebitAbsorption >= 0 ? 'good' : 'bad'}
@@ -719,7 +760,7 @@ export default function App() {
               />
 
               <MetricCard
-                revealIndex={6}
+                revealIndex={7}
                 title="Q3. Contribution Margin"
                 icon={TrendingUp}
                 tone="default"
@@ -730,7 +771,7 @@ export default function App() {
               />
 
               <MetricCard
-                revealIndex={7}
+                revealIndex={8}
                 title="Additional: Net after Interest"
                 icon={LineChart}
                 tone={calculations.estimatedNetAfterInterest >= 0 ? 'good' : 'warn'}
@@ -741,7 +782,7 @@ export default function App() {
               />
             </div>
 
-            <section className="section-card reveal" data-reveal="8">
+            <section className="section-card reveal" data-reveal="9">
               <header>
                 <h2>
                   <BarChart2 size={18} /> Q4. Break-Even + CVP Graph
@@ -766,10 +807,10 @@ export default function App() {
                 </div>
               </div>
 
-              <CVPChart />
+              {renderCVPChart()}
             </section>
 
-            <section className="section-card reveal" data-reveal="10">
+            <section className="section-card reveal" data-reveal="11">
               <header>
                 <h2>
                   <Target size={18} /> Q5. Units Required for Target Income
@@ -791,7 +832,7 @@ export default function App() {
               </div>
             </section>
 
-            <section className="section-card reveal" data-reveal="11">
+            <section className="section-card reveal" data-reveal="12">
               <header>
                 <h2>
                   <Lightbulb size={18} /> Q6 + Q7. Owner Advice and Final Reasoning
@@ -846,7 +887,7 @@ export default function App() {
           </section>
         </div>
 
-        <footer className="studio-footer reveal" data-reveal="12">
+        <footer className="studio-footer reveal" data-reveal="13">
           <AlertCircle size={16} />
           <span>
             This dashboard uses the case exhibits for fixed/variable classification and adds sensitivity controls for managerial decision testing.
