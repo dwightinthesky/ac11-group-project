@@ -70,7 +70,7 @@ const formatPct = (num) => {
 
 function MetricCard({ title, value, sub, tone = 'default', icon: Icon, revealIndex }) {
   return (
-    <article className={`metric-card metric-card--${tone} reveal`} data-reveal={revealIndex}>
+    <article className={`metric-card metric-card--${tone} reveal is-visible`} data-reveal={revealIndex}>
       <header className="metric-card__header">
         <span className="metric-card__icon">{Icon ? <Icon size={18} /> : null}</span>
         <h3>{title}</h3>
