@@ -7,6 +7,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+(() => {
+  try {
+    const key = 'ac11-theme';
+    const saved = localStorage.getItem(key);
+    const systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = saved === 'light' || saved === 'dark' ? saved : (systemDark ? 'dark' : 'light');
+    document.documentElement.dataset.theme = theme;
+  } catch (_) {
+    document.documentElement.dataset.theme = 'dark';
+  }
+})();
+</script>
 
 <style>
 /* ══════════════════════════════════════════════════════
@@ -68,60 +81,35 @@
   --nav-h: 60px;
   --ease: cubic-bezier(0.22,1,0.36,1);
   --ease-in: cubic-bezier(0.4,0,1,1);
-
-  /* Theme-aware utility colors */
-  --noise-opacity: 0.028;
-  --orb-a: rgba(224,114,40,0.10);
-  --orb-b: rgba(40,196,180,0.07);
-  --nav-scrolled-bg: rgba(8,8,9,0.85);
-
-  --chart-grid: rgba(255,255,255,0.04);
-  --chart-label: rgba(255,255,255,0.2);
-  --chart-axis: rgba(255,255,255,0.1);
-  --chart-axis-label: rgba(255,255,255,0.3);
-  --chart-fixed: rgba(255,255,255,0.15);
-  --chart-bep-stroke: rgba(8,8,9,1);
 }
 
-html[data-theme="light"]{
-  --bg-0: #f6f7fb;
+html[data-theme="light"] {
+  --bg-0: #f4f7fc;
   --bg-1: #ffffff;
-  --bg-2: #f2f4f9;
-  --bg-3: #ebeff7;
-  --bg-4: #dde3ee;
+  --bg-2: #edf2fa;
+  --bg-3: #e4ebf6;
+  --bg-4: #d7e1ef;
 
-  --w-100: #0f1623;
-  --w-80: rgba(15,22,35,0.82);
-  --w-50: rgba(15,22,35,0.56);
-  --w-20: rgba(15,22,35,0.24);
-  --w-08: rgba(15,22,35,0.10);
-  --w-04: rgba(15,22,35,0.05);
+  --w-100: #0f172a;
+  --w-80: rgba(15,23,42,0.84);
+  --w-50: rgba(15,23,42,0.62);
+  --w-20: rgba(15,23,42,0.24);
+  --w-08: rgba(15,23,42,0.10);
+  --w-04: rgba(15,23,42,0.05);
 
-  --a: #cf6523;
-  --a-hi: #e07228;
-  --a-lo: rgba(207,101,35,0.14);
-  --a-xs: rgba(207,101,35,0.08);
+  --a: #d96824;
+  --a-hi: #ea7d34;
+  --a-lo: rgba(217,104,36,0.12);
+  --a-xs: rgba(217,104,36,0.06);
 
-  --green: #19945f;
-  --green-lo: rgba(25,148,95,0.12);
-  --red: #bf4848;
-  --red-lo: rgba(191,72,72,0.12);
-  --amber: #be8a1d;
-  --amber-lo: rgba(190,138,29,0.12);
-  --teal: #1b9f92;
-  --teal-lo: rgba(27,159,146,0.12);
-
-  --noise-opacity: 0.016;
-  --orb-a: rgba(224,114,40,0.09);
-  --orb-b: rgba(40,196,180,0.07);
-  --nav-scrolled-bg: rgba(246,247,251,0.9);
-
-  --chart-grid: rgba(15,22,35,0.08);
-  --chart-label: rgba(15,22,35,0.5);
-  --chart-axis: rgba(15,22,35,0.16);
-  --chart-axis-label: rgba(15,22,35,0.62);
-  --chart-fixed: rgba(15,22,35,0.3);
-  --chart-bep-stroke: rgba(246,247,251,1);
+  --green: #12945f;
+  --green-lo: rgba(18,148,95,0.12);
+  --red: #c93f3f;
+  --red-lo: rgba(201,63,63,0.12);
+  --amber: #a86d05;
+  --amber-lo: rgba(168,109,5,0.12);
+  --teal: #0f9081;
+  --teal-lo: rgba(15,144,129,0.12);
 }
 
 /* ── RESET ── */
@@ -142,7 +130,10 @@ body{
 body::before{
   content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-  opacity:var(--noise-opacity);
+  opacity:0.028;
+}
+html[data-theme="light"] body::before{
+  opacity:0.018;
 }
 
 /* ── GLOW ORBS — pure CSS, zero image payload ── */
@@ -152,13 +143,19 @@ body::before{
 }
 .orb-a{
   width:480px;height:480px;
-  background:radial-gradient(circle,var(--orb-a) 0%,transparent 70%);
+  background:radial-gradient(circle,rgba(224,114,40,0.10) 0%,transparent 70%);
   top:-80px;right:-80px;
 }
 .orb-b{
   width:360px;height:360px;
-  background:radial-gradient(circle,var(--orb-b) 0%,transparent 70%);
+  background:radial-gradient(circle,rgba(40,196,180,0.07) 0%,transparent 70%);
   bottom:20%;left:-60px;
+}
+html[data-theme="light"] .orb-a{
+  background:radial-gradient(circle,rgba(217,104,36,0.09) 0%,transparent 72%);
+}
+html[data-theme="light"] .orb-b{
+  background:radial-gradient(circle,rgba(40,139,196,0.08) 0%,transparent 72%);
 }
 
 /* ══════════════════════════════════════════════════════
@@ -173,10 +170,13 @@ nav{
   border-bottom:1px solid transparent;
 }
 nav.scrolled{
-  background:var(--nav-scrolled-bg);
+  background:rgba(8,8,9,0.85);
   border-color:var(--w-08);
   backdrop-filter:blur(20px) saturate(1.4);
   -webkit-backdrop-filter:blur(20px) saturate(1.4);
+}
+html[data-theme="light"] nav.scrolled{
+  background:rgba(244,247,252,0.84);
 }
 .brand{display:flex;align-items:center;gap:var(--s2)}
 .brand-mark{
@@ -203,25 +203,30 @@ nav.scrolled{
 .nav-links a:hover{color:var(--w-100)}
 
 .nav-actions{
-  display:flex;align-items:center;gap:10px;
+  display:flex;align-items:center;gap:var(--s2);
 }
 
 .theme-toggle{
   display:inline-flex;align-items:center;gap:7px;
-  border:1px solid var(--w-08);
-  background:var(--w-04);
-  color:var(--w-50);
-  font-family:var(--f-body);font-size:var(--t-label);font-weight:600;
-  letter-spacing:0.05em;text-transform:uppercase;
-  border-radius:100px;padding:8px 12px;cursor:pointer;
-  transition:border-color 0.2s,color 0.2s,background 0.2s;
+  background:var(--bg-2);color:var(--w-80);
+  border:1px solid var(--w-08);border-radius:999px;
+  padding:8px 12px;font-size:var(--t-label);font-weight:600;
+  letter-spacing:0.02em;cursor:pointer;font-family:var(--f-body);
+  transition:border-color 0.2s, background 0.2s, color 0.2s;
 }
-.theme-toggle svg{width:13px;height:13px;flex-shrink:0}
 .theme-toggle:hover{
   border-color:var(--w-20);
+  background:var(--bg-3);
   color:var(--w-100);
-  background:var(--w-08);
 }
+.theme-toggle svg{
+  width:14px;height:14px;flex-shrink:0;
+}
+.theme-toggle .ico-sun{display:none}
+html[data-theme="dark"] .theme-toggle .ico-sun{display:block}
+html[data-theme="dark"] .theme-toggle .ico-moon{display:none}
+html[data-theme="light"] .theme-toggle .ico-sun{display:none}
+html[data-theme="light"] .theme-toggle .ico-moon{display:block}
 
 /* SINGLE CTA token — only one style site-wide */
 .cta{
@@ -730,11 +735,11 @@ tfoot td:not(:first-child){text-align:right}
 @media(max-width:640px){
   nav{padding:0 var(--s3)}
   .nav-links{display:none}
-  .nav-menu-btn{display:block}
-  .nav-actions{gap:8px}
+  .nav-actions{gap:var(--s1)}
+  .theme-toggle{padding:8px 10px;border-radius:10px}
   .theme-toggle span{display:none}
-  .theme-toggle{padding:8px}
-  .nav-actions .cta{display:none}
+  .cta{display:none}
+  .nav-menu-btn{display:block}
   .hero{padding:calc(var(--nav-h) + var(--s6)) var(--s3) var(--s6)}
   .qstrip{padding:var(--s3);flex-direction:column;align-items:flex-start}
   .sec{padding:var(--s5) var(--s3)}
@@ -754,20 +759,6 @@ tfoot td:not(:first-child){text-align:right}
   .chart-ln{stroke-dashoffset:0!important}
 }
 </style>
-<script>
-(() => {
-  try {
-    const t = localStorage.getItem('ac11-theme');
-    if (t === 'dark' || t === 'light') {
-      document.documentElement.setAttribute('data-theme', t);
-      return;
-    }
-  } catch (_) {}
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-    document.documentElement.setAttribute('data-theme', 'light');
-  }
-})();
-</script>
 </head>
 <body>
 
@@ -790,12 +781,15 @@ tfoot td:not(:first-child){text-align:right}
     <li><a href="#">Recommendation</a></li>
   </ul>
   <div class="nav-actions">
-    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark/light mode">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 3a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1zM12 18a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
-        <path d="M3 12a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1zm14-7.07a1 1 0 0 1 1.41 0l.7.7a1 1 0 0 1-1.41 1.42l-.7-.71a1 1 0 0 1 0-1.41zM17.66 16.95a1 1 0 0 1 1.41 0l.7.7a1 1 0 0 1-1.41 1.42l-.7-.71a1 1 0 0 1 0-1.41zM3.51 5.63a1 1 0 0 1 1.41 0l.7.7A1 1 0 0 1 4.21 7.74l-.7-.71a1 1 0 0 1 0-1.4zM3.51 18.37a1 1 0 0 1 0-1.42l.7-.7a1 1 0 1 1 1.41 1.42l-.7.7a1 1 0 0 1-1.41 0zM19 12a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2h-1a1 1 0 0 1-1-1z"/>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch color mode">
+      <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
       </svg>
-      <span>Theme</span>
+      <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3c.03.32.05.65.05 1a7 7 0 0 0 8.74 6.79z"></path>
+      </svg>
+      <span id="theme-toggle-label">Dark mode</span>
     </button>
     <!-- Single CTA token — no repetition (analysis: fix CTA button repetition) -->
     <button class="cta" onclick="document.querySelector('.layout').scrollIntoView({behavior:'smooth'})">
@@ -1017,7 +1011,7 @@ tfoot td:not(:first-child){text-align:right}
         <div class="chart-legend">
           <div class="leg-item"><div class="leg-line" style="background:#4b8fff"></div>Revenue</div>
           <div class="leg-item"><div class="leg-line" style="background:#e05454"></div>Total Cost</div>
-          <div class="leg-item"><div class="leg-line" style="background:rgba(255,255,255,0.15);"></div>Fixed Cost</div>
+          <div class="leg-item"><div class="leg-line" style="background:var(--w-20)"></div>Fixed Cost</div>
           <div class="leg-item">
             <div style="width:8px;height:8px;border-radius:50%;background:#e8aa28;flex-shrink:0"></div>
             Break-even point
@@ -1102,44 +1096,51 @@ let S={price:7,vc:4.5,volume:2400000,fc:fmTotal*12,ti:3000000};
 const fC=n=>Number.isFinite(n)?`Rs ${Math.round(n).toLocaleString('en-IN')}`:'N/A';
 const fN=n=>Number.isFinite(n)?Math.round(n).toLocaleString('en-IN'):'N/A';
 const fP=n=>Number.isFinite(n)?`${n.toFixed(2)}%`:'N/A';
-const cssVar=(name,fallback='')=>getComputedStyle(document.documentElement).getPropertyValue(name).trim()||fallback;
-
-/* ═══════════════════════════ THEME ═══════════════════════════ */
 const THEME_KEY='ac11-theme';
 
-function setTheme(theme,{persist=true,refresh=false}={}){
-  document.documentElement.setAttribute('data-theme',theme);
+function readStoredTheme(){
+  try{
+    const v=localStorage.getItem(THEME_KEY);
+    return (v==='light'||v==='dark')?v:null;
+  }catch(_){
+    return null;
+  }
+}
 
+function preferredTheme(){
+  const saved=readStoredTheme();
+  if(saved)return saved;
+  return matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';
+}
+
+function applyTheme(theme){
+  document.documentElement.dataset.theme=theme;
   const btn=document.getElementById('theme-toggle');
-  if(btn){
-    const nextLabel=theme==='dark'?'Light mode':'Dark mode';
-    btn.querySelector('span').textContent=nextLabel;
-    btn.setAttribute('aria-label',`Switch to ${nextLabel.toLowerCase()}`);
-    btn.setAttribute('aria-pressed',theme==='light'?'true':'false');
-  }
-
-  if(persist){
-    try{localStorage.setItem(THEME_KEY,theme);}catch(_){}
-  }
-  if(refresh)render();
+  const label=document.getElementById('theme-toggle-label');
+  if(label)label.textContent=theme==='dark'?'Light mode':'Dark mode';
+  if(btn)btn.setAttribute('aria-label',theme==='dark'?'Switch to light mode':'Switch to dark mode');
 }
 
 function initThemeToggle(){
-  let initial='dark';
-  try{
-    const saved=localStorage.getItem(THEME_KEY);
-    if(saved==='dark'||saved==='light')initial=saved;
-    else if(matchMedia('(prefers-color-scheme: light)').matches)initial='light';
-  }catch(_){}
-
-  setTheme(initial,{persist:false,refresh:false});
-
+  applyTheme(preferredTheme());
   const btn=document.getElementById('theme-toggle');
-  if(!btn)return;
-  btn.addEventListener('click',()=>{
-    const current=document.documentElement.getAttribute('data-theme')==='light'?'light':'dark';
-    setTheme(current==='dark'?'light':'dark',{persist:true,refresh:true});
-  });
+  if(btn){
+    btn.addEventListener('click',()=>{
+      const cur=document.documentElement.dataset.theme==='light'?'light':'dark';
+      const next=cur==='dark'?'light':'dark';
+      try{localStorage.setItem(THEME_KEY,next);}catch(_){}
+      applyTheme(next);
+      render();
+    });
+  }
+  const mq=matchMedia('(prefers-color-scheme: dark)');
+  if(mq.addEventListener){
+    mq.addEventListener('change',e=>{
+      if(readStoredTheme())return;
+      applyTheme(e.matches?'dark':'light');
+      render();
+    });
+  }
 }
 
 /* ═══════════════════════════ CALC ═══════════════════════════ */
@@ -1226,6 +1227,13 @@ function renderChart(c){
   const W=860,H=360,P={t:24,r:24,b:54,l:80};
   const iW=W-P.l-P.r,iH=H-P.t-P.b;
   const{price,vc}=S;
+  const light=document.documentElement.dataset.theme==='light';
+  const gridStroke=light?'rgba(15,23,42,0.10)':'rgba(255,255,255,0.04)';
+  const axisStroke=light?'rgba(15,23,42,0.22)':'rgba(255,255,255,0.10)';
+  const microText=light?'rgba(15,23,42,0.44)':'rgba(255,255,255,0.2)';
+  const axisText=light?'rgba(15,23,42,0.60)':'rgba(255,255,255,0.3)';
+  const fixedStroke=light?'rgba(15,23,42,0.30)':'rgba(255,255,255,0.15)';
+  const bepStroke=light?'rgba(255,255,255,0.95)':'rgba(8,8,9,1)';
   const maxX=CAP;
   const maxY=Math.max(price*maxX,c.fAbs+vc*maxX,c.rev,c.fAbs)*1.06;
   const sx=v=>P.l+(v/maxX)*iW;
@@ -1236,12 +1244,6 @@ function renderChart(c){
   const rLen=Math.hypot(r3-r1,r4-r2),cLen=Math.hypot(c3-c1,c4-c2);
   const bepVis=isFinite(c.bepU)&&c.bepU>=0&&c.bepU<=maxX;
   const bX=bepVis?sx(c.bepU):0,bY=bepVis?sy(c.bepR):0;
-  const chartGrid=cssVar('--chart-grid','rgba(255,255,255,0.04)');
-  const chartLabel=cssVar('--chart-label','rgba(255,255,255,0.2)');
-  const chartAxis=cssVar('--chart-axis','rgba(255,255,255,0.1)');
-  const chartAxisLabel=cssVar('--chart-axis-label','rgba(255,255,255,0.3)');
-  const chartFixed=cssVar('--chart-fixed','rgba(255,255,255,0.15)');
-  const chartBepStroke=cssVar('--chart-bep-stroke','rgba(8,8,9,1)');
 
   let h=`<defs>
     <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -1257,23 +1259,23 @@ function renderChart(c){
   /* grid */
   [0,.25,.5,.75,1].forEach(r=>{
     const y=P.t+iH*r,v=(maxY*(1-r)/1e6).toFixed(1);
-    h+=`<line x1="${P.l}" y1="${y}" x2="${W-P.r}" y2="${y}" stroke="${chartGrid}" stroke-width="1"/>
-    <text x="${P.l-8}" y="${y+4}" text-anchor="end" font-size="10" fill="${chartLabel}" font-family="JetBrains Mono,monospace">${v}M</text>`;
+    h+=`<line x1="${P.l}" y1="${y}" x2="${W-P.r}" y2="${y}" stroke="${gridStroke}" stroke-width="1"/>
+    <text x="${P.l-8}" y="${y+4}" text-anchor="end" font-size="10" fill="${microText}" font-family="JetBrains Mono,monospace">${v}M</text>`;
   });
   [0,.2,.4,.6,.8,1].forEach(r=>{
     const x=P.l+iW*r;
-    h+=`<line x1="${x}" y1="${P.t}" x2="${x}" y2="${H-P.b}" stroke="${chartGrid}" stroke-width="1" stroke-dasharray="4 4"/>
-    <text x="${x}" y="${H-P.b+20}" text-anchor="middle" font-size="10" fill="${chartLabel}" font-family="JetBrains Mono,monospace">${(maxX*r/1e6).toFixed(1)}M</text>`;
+    h+=`<line x1="${x}" y1="${P.t}" x2="${x}" y2="${H-P.b}" stroke="${gridStroke}" stroke-width="1" stroke-dasharray="4 4"/>
+    <text x="${x}" y="${H-P.b+20}" text-anchor="middle" font-size="10" fill="${microText}" font-family="JetBrains Mono,monospace">${(maxX*r/1e6).toFixed(1)}M</text>`;
   });
 
   /* axes */
-  h+=`<line x1="${P.l}" y1="${P.t}" x2="${P.l}" y2="${H-P.b}" stroke="${chartAxis}" stroke-width="1.5"/>
-  <line x1="${P.l}" y1="${H-P.b}" x2="${W-P.r}" y2="${H-P.b}" stroke="${chartAxis}" stroke-width="1.5"/>
-  <text x="${P.l-52}" y="${P.t-8}" font-size="10" fill="${chartAxisLabel}" font-weight="600" font-family="DM Sans,sans-serif">Amount (Rs)</text>
-  <text x="${W-P.r-4}" y="${H-P.b+38}" font-size="10" fill="${chartAxisLabel}" text-anchor="end" font-weight="600" font-family="DM Sans,sans-serif">Annual output (bricks)</text>`;
+  h+=`<line x1="${P.l}" y1="${P.t}" x2="${P.l}" y2="${H-P.b}" stroke="${axisStroke}" stroke-width="1.5"/>
+  <line x1="${P.l}" y1="${H-P.b}" x2="${W-P.r}" y2="${H-P.b}" stroke="${axisStroke}" stroke-width="1.5"/>
+  <text x="${P.l-52}" y="${P.t-8}" font-size="10" fill="${axisText}" font-weight="600" font-family="DM Sans,sans-serif">Amount (Rs)</text>
+  <text x="${W-P.r-4}" y="${H-P.b+38}" font-size="10" fill="${axisText}" text-anchor="end" font-weight="600" font-family="DM Sans,sans-serif">Annual output (bricks)</text>`;
 
   /* fixed cost */
-  h+=`<line x1="${sx(0)}" y1="${sy(c.fAbs)}" x2="${sx(maxX)}" y2="${sy(c.fAbs)}" stroke="${chartFixed}" stroke-width="1.5" stroke-dasharray="6 5"/>`;
+  h+=`<line x1="${sx(0)}" y1="${sy(c.fAbs)}" x2="${sx(maxX)}" y2="${sy(c.fAbs)}" stroke="${fixedStroke}" stroke-width="1.5" stroke-dasharray="6 5"/>`;
 
   /* revenue line */
   h+=`<line class="chart-ln" data-len="${rLen}" x1="${r1}" y1="${r2}" x2="${r3}" y2="${r4}" stroke="url(#rg)" stroke-width="2.5" stroke-linecap="round"/>`;
@@ -1288,7 +1290,7 @@ function renderChart(c){
 
   /* BEP */
   if(bepVis){
-    h+=`<circle cx="${bX}" cy="${bY}" r="7" fill="#e8aa28" stroke="${chartBepStroke}" stroke-width="2.5"/>
+    h+=`<circle cx="${bX}" cy="${bY}" r="7" fill="#e8aa28" stroke="${bepStroke}" stroke-width="2.5"/>
     <text x="${bX}" y="${bY-13}" text-anchor="middle" font-size="10.5" fill="#e8aa28" font-weight="700" font-family="DM Sans,sans-serif">BEP</text>`;
   }
 
@@ -1366,7 +1368,6 @@ window.addEventListener('scroll',()=>{
 /* ═══════════════════════════ INIT ═══════════════════════════ */
 document.addEventListener('DOMContentLoaded',()=>{
   initThemeToggle();
-
   /* init slider fills */
   const sliders=[
     {id:'s-price',min:5,max:10,v:S.price,k:'price'},
