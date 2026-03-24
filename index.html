@@ -1,13 +1,1243 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ac11-group-project</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AC11 · Fly Ash Brick Profitability Navigator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════════════════
+   TOKENS  —  "White System" on dark (per analysis)
+   Three-tiered typography scale · 8px base grid
+   Single CTA token · No repeated button variants
+══════════════════════════════════════════════════════ */
+:root {
+  /* Backgrounds — deliberate tonal steps */
+  --bg-0: #080809;
+  --bg-1: #0e0f11;
+  --bg-2: #141518;
+  --bg-3: #1b1c20;
+  --bg-4: #222428;
+
+  /* White system — primary contrast vehicle */
+  --w-100: #ffffff;
+  --w-80:  rgba(255,255,255,0.80);
+  --w-50:  rgba(255,255,255,0.50);
+  --w-20:  rgba(255,255,255,0.20);
+  --w-08:  rgba(255,255,255,0.08);
+  --w-04:  rgba(255,255,255,0.04);
+
+  /* Single accent system — orange only */
+  --a:     #e07228;
+  --a-hi:  #f08340;
+  --a-lo:  rgba(224,114,40,0.15);
+  --a-xs:  rgba(224,114,40,0.07);
+
+  /* Semantic tones */
+  --green: #28d48c;
+  --green-lo: rgba(40,212,140,0.12);
+  --red:   #e05454;
+  --red-lo: rgba(224,84,84,0.12);
+  --amber: #e8aa28;
+  --amber-lo: rgba(232,170,40,0.12);
+  --teal:  #28c4b4;
+  --teal-lo: rgba(40,196,180,0.12);
+
+  /* Typography scale — Satoshi-equivalent: Outfit */
+  --f-disp: 'Outfit', system-ui, sans-serif;
+  --f-body: 'DM Sans', system-ui, sans-serif;
+  --f-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  /* Type scale (3-tier) */
+  --t-hero:   clamp(2.6rem, 5.5vw, 4.2rem);
+  --t-title:  clamp(1.35rem, 2.2vw, 1.75rem);
+  --t-lead:   1rem;
+  --t-body:   0.875rem;
+  --t-label:  0.6875rem;
+  --t-micro:  0.625rem;
+
+  /* Spacing — 8px grid */
+  --s1: 8px;   --s2: 16px;  --s3: 24px;  --s4: 32px;
+  --s5: 40px;  --s6: 48px;  --s7: 64px;  --s8: 80px;
+
+  /* Geometry */
+  --r-sm: 6px; --r-md: 10px; --r-lg: 16px; --r-xl: 22px;
+  --nav-h: 60px;
+  --ease: cubic-bezier(0.22,1,0.36,1);
+  --ease-in: cubic-bezier(0.4,0,1,1);
+}
+
+/* ── RESET ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  background:var(--bg-0);
+  color:var(--w-80);
+  font-family:var(--f-body);
+  font-size:var(--t-body);
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  min-height:100dvh;
+}
+
+/* ── NOISE — single CSS layer, no image ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+  opacity:0.028;
+}
+
+/* ── GLOW ORBS — pure CSS, zero image payload ── */
+.orb{
+  position:fixed;border-radius:50%;pointer-events:none;z-index:0;
+  filter:blur(80px);
+}
+.orb-a{
+  width:480px;height:480px;
+  background:radial-gradient(circle,rgba(224,114,40,0.10) 0%,transparent 70%);
+  top:-80px;right:-80px;
+}
+.orb-b{
+  width:360px;height:360px;
+  background:radial-gradient(circle,rgba(40,196,180,0.07) 0%,transparent 70%);
+  bottom:20%;left:-60px;
+}
+
+/* ══════════════════════════════════════════════════════
+   NAVIGATION
+   Analysis fix: single CTA token, not repeated
+══════════════════════════════════════════════════════ */
+nav{
+  position:fixed;top:0;left:0;right:0;height:var(--nav-h);z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 var(--s5);
+  transition:background 0.4s var(--ease), border-color 0.4s;
+  border-bottom:1px solid transparent;
+}
+nav.scrolled{
+  background:rgba(8,8,9,0.85);
+  border-color:var(--w-08);
+  backdrop-filter:blur(20px) saturate(1.4);
+  -webkit-backdrop-filter:blur(20px) saturate(1.4);
+}
+.brand{display:flex;align-items:center;gap:var(--s2)}
+.brand-mark{
+  width:30px;height:30px;border-radius:var(--r-sm);
+  background:var(--a);display:grid;place-items:center;flex-shrink:0;
+}
+.brand-mark svg{width:16px;height:16px;fill:#fff}
+.brand-name{
+  font-family:var(--f-disp);font-size:0.95rem;font-weight:700;
+  color:var(--w-100);letter-spacing:-0.01em;
+}
+.brand-name span{color:var(--a);font-weight:300;font-style:italic}
+
+/* Nav links — no hover effects matching CTA style (analysis: separate concerns) */
+.nav-links{
+  display:flex;align-items:center;gap:var(--s4);list-style:none;
+}
+.nav-links a{
+  color:var(--w-50);text-decoration:none;
+  font-size:var(--t-label);font-weight:500;
+  letter-spacing:0.07em;text-transform:uppercase;
+  transition:color 0.2s;
+}
+.nav-links a:hover{color:var(--w-100)}
+
+/* SINGLE CTA token — only one style site-wide */
+.cta{
+  display:inline-flex;align-items:center;gap:var(--s1);
+  background:var(--a);color:#fff;
+  font-family:var(--f-body);font-size:0.8125rem;font-weight:600;
+  letter-spacing:0.03em;text-decoration:none;
+  padding:9px 20px;border-radius:100px;border:none;cursor:pointer;
+  transition:background 0.2s, transform 0.2s, box-shadow 0.2s;
+  white-space:nowrap;
+  box-shadow:0 2px 16px rgba(224,114,40,0.25);
+}
+.cta:hover{
+  background:var(--a-hi);transform:translateY(-1px);
+  box-shadow:0 4px 24px rgba(224,114,40,0.35);
+}
+.cta:active{transform:translateY(0)}
+.cta svg{width:13px;height:13px;flex-shrink:0}
+
+/* Hamburger — mobile only */
+.nav-menu-btn{
+  display:none;background:none;border:1px solid var(--w-08);
+  border-radius:var(--r-sm);padding:8px;cursor:pointer;color:var(--w-50);
+  transition:border-color 0.2s,color 0.2s;
+}
+.nav-menu-btn:hover{border-color:var(--w-20);color:var(--w-100)}
+.nav-menu-btn svg{width:16px;height:16px;display:block}
+
+/* ══════════════════════════════════════════════════════
+   HERO — Tier 1 typography, controlled breathing room
+══════════════════════════════════════════════════════ */
+.hero{
+  position:relative;z-index:1;
+  padding:calc(var(--nav-h) + var(--s8)) var(--s8) var(--s8);
+  border-bottom:1px solid var(--w-08);
+  overflow:hidden;
+}
+.hero-inner{max-width:860px}
+
+/* Eyebrow — uppercase label micro-type */
+.eyebrow{
+  display:inline-flex;align-items:center;gap:var(--s2);
+  font-size:var(--t-micro);font-weight:600;letter-spacing:0.18em;
+  text-transform:uppercase;color:var(--a);
+  margin-bottom:var(--s3);
+}
+.eyebrow-line{width:24px;height:1px;background:var(--a)}
+
+/* Tier 1 — Display headline */
+.hero-title{
+  font-family:var(--f-disp);
+  font-size:var(--t-hero);
+  font-weight:800;line-height:1.05;
+  letter-spacing:-0.025em;
+  color:var(--w-100);
+  margin-bottom:var(--s3);
+}
+.hero-title em{
+  font-style:italic;font-weight:300;
+  color:var(--a);display:block;
+  font-size:0.92em;
+}
+
+/* Tier 2 — Lead text */
+.hero-lead{
+  font-size:var(--t-lead);color:var(--w-50);
+  max-width:520px;line-height:1.75;
+  margin-bottom:var(--s5);
+}
+
+/* Badges — not repeated CTA style */
+.badge-row{
+  display:flex;flex-wrap:wrap;gap:var(--s1);
+  margin-bottom:var(--s7);
+}
+.badge{
+  display:inline-flex;align-items:center;gap:7px;
+  font-size:var(--t-label);font-weight:500;color:var(--w-50);
+  padding:5px 12px;border:1px solid var(--w-08);
+  border-radius:100px;
+  transition:border-color 0.2s,color 0.2s;
+}
+.badge:hover{border-color:var(--w-20);color:var(--w-80)}
+.badge svg{width:11px;height:11px;flex-shrink:0}
+
+/* Hero stat row — bottom of hero, consistent rhythm */
+.hero-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border-top:1px solid var(--w-08);padding-top:var(--s5);
+  gap:1px;
+}
+.hstat{padding-right:var(--s4)}
+.hstat+.hstat{padding-left:var(--s4);border-left:1px solid var(--w-08)}
+.hstat-label{
+  font-size:var(--t-micro);font-weight:500;
+  letter-spacing:0.13em;text-transform:uppercase;
+  color:var(--w-20);margin-bottom:var(--s1);
+}
+.hstat-val{
+  font-family:var(--f-mono);font-size:1.3rem;font-weight:600;
+  color:var(--w-100);
+}
+.hstat-unit{
+  font-size:var(--t-label);font-weight:400;
+  color:var(--w-50);margin-left:4px;font-family:var(--f-body);
+}
+
+/* ══════════════════════════════════════════════════════
+   EXECUTIVE STRIP — Component design: 4 floating cards
+══════════════════════════════════════════════════════ */
+.exec-strip{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  border-bottom:1px solid var(--w-08);
+  position:relative;z-index:1;
+}
+.ecard{
+  padding:var(--s4) var(--s4) var(--s4);
+  border-right:1px solid var(--w-08);
+  position:relative;overflow:hidden;
+  transition:background 0.3s;
+}
+.ecard:last-child{border-right:none}
+.ecard-accent{
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--w-08);
+  transition:background 0.3s var(--ease), opacity 0.3s;
+}
+.ecard.good  .ecard-accent{background:var(--green)}
+.ecard.bad   .ecard-accent{background:var(--red)}
+.ecard.warn  .ecard-accent{background:var(--amber)}
+.ecard.teal  .ecard-accent{background:var(--teal)}
+.ecard:hover{background:var(--w-04)}
+.ecard-label{
+  font-size:var(--t-micro);font-weight:600;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--w-20);margin-bottom:var(--s2);margin-top:2px;
+}
+.ecard-val{
+  font-family:var(--f-mono);font-size:1rem;font-weight:600;
+  color:var(--w-100);margin-bottom:6px;
+  transition:color 0.3s;
+}
+.ecard-val.good{color:var(--green)}
+.ecard-val.bad {color:var(--red)}
+.ecard-val.warn{color:var(--amber)}
+.ecard-note{font-size:var(--t-label);color:var(--w-20);line-height:1.5}
+
+/* ══════════════════════════════════════════════════════
+   ASSIGNMENT STRIP
+══════════════════════════════════════════════════════ */
+.qstrip{
+  display:flex;align-items:center;gap:var(--s4);
+  padding:var(--s3) var(--s8);
+  border-bottom:1px solid var(--w-08);
+  position:relative;z-index:1;
+  flex-wrap:wrap;
+}
+.qlabel{
+  font-size:var(--t-micro);font-weight:600;
+  letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--w-20);white-space:nowrap;flex-shrink:0;
+}
+.qchips{display:flex;flex-wrap:wrap;gap:6px}
+.qchip{
+  font-size:var(--t-label);color:var(--w-50);
+  padding:3px 10px 3px 8px;
+  border:1px solid var(--w-08);border-radius:var(--r-sm);
+  display:flex;align-items:center;gap:6px;
+  transition:border-color 0.2s,color 0.2s;
+}
+.qchip::before{
+  content:'';width:4px;height:4px;border-radius:50%;
+  background:var(--a);flex-shrink:0;
+}
+.qchip:hover{border-color:var(--w-20);color:var(--w-80)}
+
+/* ══════════════════════════════════════════════════════
+   MAIN LAYOUT
+══════════════════════════════════════════════════════ */
+.layout{
+  display:grid;grid-template-columns:300px 1fr;
+  min-height:calc(100vh - var(--nav-h));
+  position:relative;z-index:1;
+}
+
+/* ══════════════════════════════════════════════════════
+   CONTROL PANEL — vertical rhythm, systematic spacing
+══════════════════════════════════════════════════════ */
+.controls{
+  border-right:1px solid var(--w-08);
+  padding:var(--s5) var(--s4);
+  position:sticky;top:var(--nav-h);
+  height:calc(100dvh - var(--nav-h));
+  overflow-y:auto;
+  scrollbar-width:thin;scrollbar-color:var(--bg-3) transparent;
+}
+.ctrl-head{margin-bottom:var(--s5)}
+.ctrl-head .eyebrow{margin-bottom:var(--s2)}
+.ctrl-title{
+  font-family:var(--f-disp);font-size:1.2rem;font-weight:700;
+  color:var(--w-100);line-height:1.2;margin-bottom:var(--s2);
+}
+.ctrl-note{
+  font-size:var(--t-label);color:var(--w-20);line-height:1.65;
+  padding-bottom:var(--s4);border-bottom:1px solid var(--w-08);
+}
+/* Reset uses CTA token (the ONE button style) — smaller variant */
+.cta.sm{font-size:var(--t-label);padding:7px 14px;width:100%;justify-content:center;margin:var(--s4) 0}
+
+/* ── Slider groups ── */
+.sl-group{margin-bottom:var(--s3)}
+.sl-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  margin-bottom:var(--s1);
+}
+.sl-name{font-size:var(--t-label);color:var(--w-50)}
+.sl-val{
+  font-family:var(--f-mono);font-size:0.75rem;font-weight:600;
+  color:var(--a);
+}
+input[type=range]{
+  -webkit-appearance:none;width:100%;height:2px;
+  background:var(--bg-4);border-radius:2px;outline:none;cursor:pointer;
+}
+input[type=range]::-webkit-slider-runnable-track{
+  height:2px;border-radius:2px;
+  background:linear-gradient(to right,var(--a) var(--fill,0%),var(--bg-4) var(--fill,0%));
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:13px;height:13px;border-radius:50%;
+  background:var(--a);border:2px solid var(--bg-0);
+  box-shadow:0 0 0 2px transparent;
+  transition:box-shadow 0.2s,transform 0.15s;
+}
+input[type=range]:hover::-webkit-slider-thumb{
+  box-shadow:0 0 0 4px var(--a-lo);transform:scale(1.1);
+}
+input[type=range]::-moz-range-thumb{
+  width:13px;height:13px;border-radius:50%;
+  background:var(--a);border:2px solid var(--bg-0);cursor:pointer;
+}
+input[type=range]::-moz-range-track{height:2px;background:var(--bg-4)}
+
+/* Case constants block */
+.const-block{
+  margin-top:var(--s4);padding:var(--s3);
+  background:var(--bg-2);border:1px solid var(--w-08);
+  border-radius:var(--r-md);
+}
+.const-block-title{
+  font-size:var(--t-micro);font-weight:600;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--w-20);margin-bottom:var(--s2);
+}
+.const-list{list-style:none;display:flex;flex-direction:column;gap:7px}
+.const-list li{
+  font-size:var(--t-label);color:var(--w-50);
+  font-family:var(--f-mono);padding-left:12px;position:relative;
+}
+.const-list li::before{
+  content:'—';position:absolute;left:0;color:var(--w-20);
+}
+
+/* ══════════════════════════════════════════════════════
+   RESULTS COLUMN — section rhythm
+══════════════════════════════════════════════════════ */
+.results{padding:0}
+
+/* Section wrapper — consistent vertical breathing */
+.sec{
+  padding:var(--s7) var(--s7);
+  border-bottom:1px solid var(--w-08);
+}
+.sec:last-child{border-bottom:none}
+
+/* Section header: number + title with icon */
+.sec-num{
+  font-size:var(--t-micro);font-weight:600;
+  letter-spacing:0.16em;text-transform:uppercase;
+  color:var(--w-20);margin-bottom:4px;
+}
+/* Tier 2 heading */
+.sec-title{
+  font-family:var(--f-disp);font-size:var(--t-title);
+  font-weight:700;color:var(--w-100);
+  line-height:1.18;letter-spacing:-0.015em;
+  margin-bottom:var(--s4);
+  display:flex;align-items:center;gap:10px;
+}
+.sec-title svg{
+  width:18px;height:18px;flex-shrink:0;
+  color:var(--a);opacity:0.9;
+}
+
+/* ── Tables ── */
+.tbl-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s4);margin-bottom:var(--s4)}
+.tbl-label{
+  font-size:var(--t-micro);font-weight:600;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--w-20);margin-bottom:var(--s2);
+}
+table{width:100%;border-collapse:collapse;font-size:var(--t-label)}
+thead th{
+  text-align:left;padding:7px 10px;
+  font-size:var(--t-micro);font-weight:600;
+  letter-spacing:0.09em;text-transform:uppercase;
+  color:var(--w-20);border-bottom:1px solid var(--w-08);
+}
+thead th:not(:first-child){text-align:right}
+tbody td{
+  padding:8px 10px;color:var(--w-50);
+  border-bottom:1px solid var(--w-04);
+  transition:color 0.15s;
+}
+tbody td:not(:first-child){
+  text-align:right;font-family:var(--f-mono);font-size:0.7rem;
+}
+tbody tr:hover td{color:var(--w-80)}
+tfoot td{
+  padding:9px 10px;font-size:0.7rem;font-weight:600;
+  color:var(--w-100);font-family:var(--f-mono);
+  border-top:1px solid var(--w-08);background:var(--bg-2);
+}
+tfoot td:not(:first-child){text-align:right}
+
+/* ── Gross banner ── */
+.gross{
+  display:flex;align-items:stretch;
+  background:var(--bg-2);border:1px solid var(--w-08);
+  border-radius:var(--r-md);overflow:hidden;
+}
+.gross-cell{flex:1;padding:var(--s3) var(--s3);text-align:center}
+.gross-cell+.gross-cell{border-left:1px solid var(--w-08)}
+.gross-cell span{
+  display:block;font-size:var(--t-micro);font-weight:600;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--w-20);margin-bottom:8px;
+}
+.gross-cell strong{
+  display:block;font-family:var(--f-mono);font-size:0.9rem;
+  font-weight:600;color:var(--w-100);transition:color 0.3s;
+}
+.gross-cell.hl strong{color:var(--teal)}
+
+/* ── Metric trio ── */
+.metric-trio{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border:1px solid var(--w-08);border-radius:var(--r-lg);
+  overflow:hidden;
+}
+.mcard{
+  background:var(--bg-1);padding:var(--s4) var(--s3);
+  border-right:1px solid var(--w-08);
+  transition:background 0.25s;
+}
+.mcard:last-child{border-right:none}
+.mcard:hover{background:var(--bg-2)}
+.mcard-head{
+  display:flex;align-items:center;gap:7px;
+  margin-bottom:var(--s2);
+}
+.mcard-head svg{width:14px;height:14px;color:var(--w-20);flex-shrink:0}
+.mcard-label{
+  font-size:var(--t-micro);font-weight:600;
+  letter-spacing:0.09em;text-transform:uppercase;color:var(--w-20);
+}
+.mcard-val{
+  font-family:var(--f-mono);font-size:1rem;font-weight:600;
+  color:var(--w-100);margin-bottom:6px;transition:color 0.3s;
+}
+.mcard-val.good{color:var(--green)}
+.mcard-val.bad {color:var(--red)}
+.mcard-val.warn{color:var(--amber)}
+.mcard-sub{font-size:var(--t-label);color:var(--w-20);line-height:1.55;font-family:var(--f-mono)}
+
+/* ── CVP ── */
+.chart-box{
+  background:var(--bg-1);border:1px solid var(--w-08);
+  border-radius:var(--r-md);padding:var(--s3);overflow:hidden;
+}
+.chart-legend{
+  display:flex;gap:var(--s4);margin-top:var(--s2);padding-top:var(--s2);
+  border-top:1px solid var(--w-08);
+}
+.leg-item{display:flex;align-items:center;gap:7px;font-size:var(--t-label);color:var(--w-20)}
+.leg-line{width:20px;height:2px;border-radius:2px}
+
+/* ── BEP metrics ── */
+.bep-trio{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border:1px solid var(--w-08);border-radius:var(--r-md);
+  overflow:hidden;margin-bottom:var(--s4);
+}
+.bstat{
+  background:var(--bg-1);padding:var(--s3) var(--s3);
+  border-right:1px solid var(--w-08);transition:background 0.25s;
+}
+.bstat:last-child{border-right:none}
+.bstat:hover{background:var(--bg-2)}
+.bstat span{
+  display:block;font-size:var(--t-micro);font-weight:600;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--w-20);margin-bottom:8px;
+}
+.bstat strong{
+  display:block;font-family:var(--f-mono);font-size:0.9rem;
+  font-weight:600;color:var(--w-100);margin-bottom:5px;
+}
+.bstat small{font-size:var(--t-label);color:var(--w-20);font-family:var(--f-mono)}
+
+/* ── Target grid ── */
+.target-row{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2)}
+.tpill{
+  background:var(--bg-2);border:1px solid var(--w-08);
+  border-radius:var(--r-md);padding:var(--s3) var(--s3);text-align:center;
+  transition:border-color 0.2s,background 0.2s;
+}
+.tpill:hover{border-color:var(--w-20);background:var(--bg-3)}
+.tpill span{
+  display:block;font-size:var(--t-micro);font-weight:600;
+  letter-spacing:0.1em;text-transform:uppercase;color:var(--w-20);
+  margin-bottom:var(--s1);
+}
+.tpill strong{font-family:var(--f-mono);font-size:0.9rem;font-weight:600;color:var(--w-100)}
+
+/* ── Verdict ── */
+.verdict{
+  border-radius:var(--r-md);padding:var(--s4) var(--s4);
+  border:1px solid var(--w-08);margin-bottom:var(--s4);
+  position:relative;overflow:hidden;transition:border-color 0.3s;
+}
+.verdict::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:currentColor;opacity:0.4;
+}
+.verdict.good{background:var(--green-lo);border-color:rgba(40,212,140,0.2);color:var(--green)}
+.verdict.bad {background:var(--red-lo);  border-color:rgba(224,84,84,0.2); color:var(--red)}
+.verdict.warn{background:var(--amber-lo);border-color:rgba(232,170,40,0.2);color:var(--amber)}
+.verdict-title{
+  font-family:var(--f-disp);font-size:1.1rem;font-weight:700;
+  margin-bottom:7px;
+}
+.verdict-body{font-size:var(--t-body);color:var(--w-50);line-height:1.7}
+
+/* ── Reason grid ── */
+.reason-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
+.rcard{
+  background:var(--bg-1);border:1px solid var(--w-08);
+  border-radius:var(--r-md);padding:var(--s3);
+}
+.rcard-title{
+  font-size:var(--t-micro);font-weight:600;
+  letter-spacing:0.1em;text-transform:uppercase;
+  color:var(--w-20);margin-bottom:var(--s3);
+}
+.rcard ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.rcard li{
+  font-size:var(--t-label);color:var(--w-50);
+  line-height:1.65;padding-left:14px;position:relative;
+}
+.rcard li::before{
+  content:'';position:absolute;left:0;top:6px;
+  width:4px;height:4px;border-radius:50%;background:var(--a);
+}
+.rcard li b{color:var(--w-80);font-weight:600}
+
+/* ── Footer ── */
+.foot{
+  border-top:1px solid var(--w-08);padding:var(--s3) var(--s8);
+  display:flex;align-items:flex-start;gap:var(--s2);
+  position:relative;z-index:1;
+}
+.foot svg{width:14px;height:14px;color:var(--w-20);flex-shrink:0;margin-top:1px}
+.foot p{font-size:var(--t-label);color:var(--w-20);line-height:1.65}
+
+/* ══════════════════════════════════════════════════════
+   SCROLL REVEAL — staggered fade+lift
+══════════════════════════════════════════════════════ */
+.r{opacity:0;transform:translateY(18px);transition:opacity 0.6s var(--ease),transform 0.6s var(--ease)}
+.r.on{opacity:1;transform:none}
+.r[data-d="1"]{transition-delay:0.07s}
+.r[data-d="2"]{transition-delay:0.14s}
+.r[data-d="3"]{transition-delay:0.21s}
+.r[data-d="4"]{transition-delay:0.28s}
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════════════ */
+@media(max-width:1100px){
+  .hero{padding-left:var(--s6);padding-right:var(--s6)}
+  .qstrip{padding-left:var(--s6);padding-right:var(--s6)}
+  .sec{padding:var(--s6) var(--s6)}
+  .foot{padding-left:var(--s6);padding-right:var(--s6)}
+}
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .controls{position:static;height:auto;border-right:none;border-bottom:1px solid var(--w-08)}
+  .exec-strip{grid-template-columns:repeat(2,1fr)}
+  .metric-trio{grid-template-columns:1fr 1fr}
+  .mcard:nth-child(2){border-right:none}
+  .tbl-grid{grid-template-columns:1fr}
+  .hero-stats{grid-template-columns:1fr;gap:var(--s4)}
+  .hstat+.hstat{border-left:none;border-top:1px solid var(--w-08);padding-left:0;padding-top:var(--s3)}
+}
+@media(max-width:640px){
+  nav{padding:0 var(--s3)}
+  .nav-links{display:none}
+  .nav-menu-btn{display:block}
+  .hero{padding:calc(var(--nav-h) + var(--s6)) var(--s3) var(--s6)}
+  .qstrip{padding:var(--s3);flex-direction:column;align-items:flex-start}
+  .sec{padding:var(--s5) var(--s3)}
+  .foot{padding:var(--s3)}
+  .bep-trio,.target-row{grid-template-columns:1fr}
+  .reason-grid{grid-template-columns:1fr}
+  .gross{flex-direction:column}
+  .gross-cell+.gross-cell{border-left:none;border-top:1px solid var(--w-08)}
+  .exec-strip{grid-template-columns:1fr}
+  .ecard{border-right:none}
+  .metric-trio{grid-template-columns:1fr}
+  .mcard{border-right:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .r,.chart-ln{transition:none!important}
+  .r{opacity:1;transform:none}
+  .chart-ln{stroke-dashoffset:0!important}
+}
+</style>
+</head>
+<body>
+
+<!-- CSS-only orbs, zero image payload -->
+<div class="orb orb-a" aria-hidden="true"></div>
+<div class="orb orb-b" aria-hidden="true"></div>
+
+<!-- ───────────── NAV ───────────── -->
+<nav id="nav">
+  <div class="brand">
+    <div class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM17 13a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/></svg>
+    </div>
+    <span class="brand-name">AC11 &nbsp;<span>Group Project</span></span>
+  </div>
+  <ul class="nav-links" role="list">
+    <li><a href="#">Overview</a></li>
+    <li><a href="#">Cost Model</a></li>
+    <li><a href="#">CVP Graph</a></li>
+    <li><a href="#">Recommendation</a></li>
+  </ul>
+  <!-- Single CTA token — no repetition (analysis: fix CTA button repetition) -->
+  <button class="cta" onclick="document.querySelector('.layout').scrollIntoView({behavior:'smooth'})">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+    Jump to Analysis
+  </button>
+  <button class="nav-menu-btn" aria-label="Menu" onclick="this.classList.toggle('open')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+</nav>
+
+<!-- ───────────── HERO ───────────── -->
+<section class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow r"><span class="eyebrow-line"></span>Case-Based Decision Workspace</p>
+    <h1 class="hero-title r" data-d="1">
+      Fly Ash Brick
+      <em>Profitability Navigator</em>
+    </h1>
+    <p class="hero-lead r" data-d="2">
+      Premium decision intelligence for pricing, cost and volume simulation.
+      Boardroom-ready answers for Q1–Q7, driven by interactive sensitivity controls.
+    </p>
+    <div class="badge-row r" data-d="3">
+      <span class="badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Formula-accurate case outputs
+      </span>
+      <span class="badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        Real-time sensitivity model
+      </span>
+      <span class="badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Assignment Q1–Q7 mapped
+      </span>
+    </div>
+    <div class="hero-stats r" data-d="4">
+      <div class="hstat">
+        <div class="hstat-label">Plant Capacity</div>
+        <div class="hstat-val">4,000,000<span class="hstat-unit">bricks/yr</span></div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-label">Baseline Annual Volume</div>
+        <div class="hstat-val">2,400,000<span class="hstat-unit">bricks/yr</span></div>
+      </div>
+      <div class="hstat">
+        <div class="hstat-label">Project Horizon</div>
+        <div class="hstat-val">5<span class="hstat-unit">years</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ───────────── EXECUTIVE STRIP ───────────── -->
+<div class="exec-strip r">
+  <div class="ecard" id="ec-ebit">
+    <div class="ecard-accent"></div>
+    <div class="ecard-label">Expected EBIT</div>
+    <div class="ecard-val" id="ev-ebit">—</div>
+    <div class="ecard-note" id="en-ebit">—</div>
+  </div>
+  <div class="ecard teal">
+    <div class="ecard-accent"></div>
+    <div class="ecard-label">Break-even Output</div>
+    <div class="ecard-val" id="ev-bep">—</div>
+    <div class="ecard-note" id="en-bep">—</div>
+  </div>
+  <div class="ecard teal">
+    <div class="ecard-accent"></div>
+    <div class="ecard-label">Contribution Margin</div>
+    <div class="ecard-val" id="ev-cm">—</div>
+    <div class="ecard-note" id="en-cm">—</div>
+  </div>
+  <div class="ecard" id="ec-tgt">
+    <div class="ecard-accent"></div>
+    <div class="ecard-label">Target Feasibility</div>
+    <div class="ecard-val" id="ev-tgt">—</div>
+    <div class="ecard-note" id="en-tgt">—</div>
+  </div>
+</div>
+
+<!-- ───────────── ASSIGNMENT STRIP ───────────── -->
+<div class="qstrip r">
+  <span class="qlabel">Coverage</span>
+  <div class="qchips">
+    <span class="qchip">Q1 Cost classification + gross profit</span>
+    <span class="qchip">Q2 EBIT (absorption costing)</span>
+    <span class="qchip">Q3 Contribution margin &amp; CM%</span>
+    <span class="qchip">Q4 Break-even + CVP graph</span>
+    <span class="qchip">Q5 Units for target income</span>
+    <span class="qchip">Q6 Owner advice</span>
+    <span class="qchip">Q7 Financial + non-financial reasoning</span>
+  </div>
+</div>
+
+<!-- ───────────── MAIN GRID ───────────── -->
+<div class="layout">
+
+  <!-- CONTROLS -->
+  <aside class="controls r">
+    <div class="ctrl-head">
+      <p class="eyebrow">
+        <span class="eyebrow-line"></span>Sensitivity
+      </p>
+      <h2 class="ctrl-title">Assumption Controls</h2>
+      <p class="ctrl-note">Default values reflect the PDF case. Adjust sliders for live sensitivity analysis.</p>
+    </div>
+
+    <button class="cta sm" onclick="resetToCase()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      Reset to case base
+    </button>
+
+    <div class="sl-group">
+      <div class="sl-row"><span class="sl-name">Price per brick (Rs)</span><b class="sl-val" id="lp">7.00</b></div>
+      <input type="range" id="s-price" min="5" max="10" step="0.05" value="7" oninput="sl(this,'price')">
+    </div>
+    <div class="sl-group">
+      <div class="sl-row"><span class="sl-name">Variable cost / brick (Rs)</span><b class="sl-val" id="lv">4.50</b></div>
+      <input type="range" id="s-vc" min="3" max="7" step="0.05" value="4.5" oninput="sl(this,'vc')">
+    </div>
+    <div class="sl-group">
+      <div class="sl-row"><span class="sl-name">Annual sales volume (bricks)</span><b class="sl-val" id="ll">2,400,000</b></div>
+      <input type="range" id="s-vol" min="1200000" max="4000000" step="50000" value="2400000" oninput="sl(this,'volume')">
+    </div>
+    <div class="sl-group">
+      <div class="sl-row"><span class="sl-name">Annual fixed operating (Rs)</span><b class="sl-val" id="lf">—</b></div>
+      <input type="range" id="s-fc" min="4000000" max="7000000" step="50000" value="5040000" oninput="sl(this,'fc')">
+    </div>
+    <div class="sl-group">
+      <div class="sl-row"><span class="sl-name">Target income (Rs)</span><b class="sl-val" id="lt">3,000,000</b></div>
+      <input type="range" id="s-ti" min="1000000" max="6000000" step="100000" value="3000000" oninput="sl(this,'ti')">
+    </div>
+
+    <div class="const-block">
+      <div class="const-block-title">Case constants</div>
+      <ul class="const-list">
+        <li>Fixed assets: Rs 7,700,000</li>
+        <li>Depreciation: Rs 1,540,000 / yr</li>
+        <li>Loan interest: Rs 480,000 / yr</li>
+        <li>Batch basis: 0.20M bricks</li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- RESULTS -->
+  <div class="results">
+
+    <!-- Q1 -->
+    <div class="sec r">
+      <div class="sec-num">Question 01</div>
+      <h2 class="sec-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+        Cost Classification &amp; Gross Profit
+      </h2>
+      <div class="tbl-grid">
+        <div>
+          <div class="tbl-label">Fixed Costs — Monthly → Annual</div>
+          <table><thead><tr><th>Item</th><th>Monthly</th><th>Annual</th></tr></thead>
+          <tbody id="t-fixed"></tbody><tfoot id="t-fixed-f"></tfoot></table>
+        </div>
+        <div>
+          <div class="tbl-label">Variable Costs — Exhibit 4 (per 0.20M batch)</div>
+          <table><thead><tr><th>Item</th><th>Per 0.20M</th><th>Per brick</th></tr></thead>
+          <tbody id="t-var"></tbody><tfoot id="t-var-f"></tfoot></table>
+        </div>
+      </div>
+      <div class="gross">
+        <div class="gross-cell"><span>Revenue</span><strong id="gr-rev">—</strong></div>
+        <div class="gross-cell"><span>Variable Cost</span><strong id="gr-vc">—</strong></div>
+        <div class="gross-cell hl"><span>Gross Profit (Q1)</span><strong id="gr-gp">—</strong></div>
+      </div>
+    </div>
+
+    <!-- Metric trio: Q2, Q3, Additional -->
+    <div class="metric-trio r" style="border-radius:0;border-left:none;border-right:none;border-bottom:none">
+      <div class="mcard">
+        <div class="mcard-head">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 6v6l4 2"/></svg>
+          <span class="mcard-label">Q2 · EBIT (Absorption)</span>
+        </div>
+        <div class="mcard-val" id="mc-ebit">—</div>
+        <div class="mcard-sub" id="ms-ebit">—</div>
+      </div>
+      <div class="mcard">
+        <div class="mcard-head">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          <span class="mcard-label">Q3 · Contribution Margin</span>
+        </div>
+        <div class="mcard-val" id="mc-cm">—</div>
+        <div class="mcard-sub" id="ms-cm">—</div>
+      </div>
+      <div class="mcard">
+        <div class="mcard-head">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <span class="mcard-label">Additional · Net after Interest</span>
+        </div>
+        <div class="mcard-val" id="mc-net">—</div>
+        <div class="mcard-sub" id="ms-net">—</div>
+      </div>
+    </div>
+
+    <!-- Q4 -->
+    <div class="sec r">
+      <div class="sec-num">Question 04</div>
+      <h2 class="sec-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Break-Even Analysis &amp; CVP Graph
+      </h2>
+      <div class="bep-trio">
+        <div class="bstat"><span>BEP Units</span><strong id="b-u">—</strong><small id="b-uc">—</small></div>
+        <div class="bstat"><span>BEP Revenue</span><strong id="b-r">—</strong><small id="b-rp">—</small></div>
+        <div class="bstat"><span>Margin of Safety</span><strong id="b-m">—</strong><small id="b-mp">—</small></div>
+      </div>
+      <div class="chart-box">
+        <svg id="cvp" viewBox="0 0 860 360" role="img" aria-label="CVP Chart" style="width:100%;height:auto;display:block"></svg>
+        <div class="chart-legend">
+          <div class="leg-item"><div class="leg-line" style="background:#4b8fff"></div>Revenue</div>
+          <div class="leg-item"><div class="leg-line" style="background:#e05454"></div>Total Cost</div>
+          <div class="leg-item"><div class="leg-line" style="background:rgba(255,255,255,0.15);"></div>Fixed Cost</div>
+          <div class="leg-item">
+            <div style="width:8px;height:8px;border-radius:50%;background:#e8aa28;flex-shrink:0"></div>
+            Break-even point
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q5 -->
+    <div class="sec r">
+      <div class="sec-num">Question 05</div>
+      <h2 class="sec-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Units Required for Target Income
+      </h2>
+      <div class="target-row">
+        <div class="tpill"><span>Target Income</span><strong id="ti-v">—</strong></div>
+        <div class="tpill"><span>Required Units</span><strong id="ti-u">—</strong></div>
+        <div class="tpill"><span>Capacity Usage</span><strong id="ti-c">—</strong></div>
+      </div>
+    </div>
+
+    <!-- Q6+Q7 -->
+    <div class="sec r">
+      <div class="sec-num">Questions 06 + 07</div>
+      <h2 class="sec-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6M10 22h4"/></svg>
+        Owner Advice &amp; Final Reasoning
+      </h2>
+      <div class="verdict" id="verdict">
+        <div class="verdict-title" id="vt">—</div>
+        <div class="verdict-body" id="vb">—</div>
+      </div>
+      <div class="reason-grid">
+        <div class="rcard">
+          <div class="rcard-title">Financial drivers</div>
+          <ul id="fin-list"></ul>
+        </div>
+        <div class="rcard">
+          <div class="rcard-title">Non-financial drivers</div>
+          <ul>
+            <li>Strong policy/environment tailwind: government actively promotes fly-ash usage.</li>
+            <li>Sustainability advantage: fly ash converts industrial waste into construction input.</li>
+            <li>Execution risks: quality compliance (IS 12894), downtime risk, demand realization risk.</li>
+            <li>Market upside in housing/infrastructure — channel certainty critical before full-scale launch.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /results -->
+</div><!-- /layout -->
+
+<!-- FOOTER -->
+<footer class="foot r">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+  <p>This dashboard uses the case exhibits for fixed/variable cost classification and adds sensitivity controls for managerial decision testing. All computations follow absorption costing methodology.</p>
+</footer>
+
+<script>
+/* ═══════════════════════════ DATA ═══════════════════════════ */
+const CAP = 4000000;
+const FIXED=[
+  {l:'Factory building rent',a:80000},{l:'General office admin',a:27000},
+  {l:'General office supplies',a:19000},{l:'Factory electricity (fixed)',a:15000},
+  {l:'General office miscellaneous',a:13000},{l:'Employees',a:150000},
+  {l:'Office assistant',a:20000},{l:'Watchman',a:21000},
+  {l:'Drivers',a:30000},{l:'Owner-manager salary',a:55000},
+];
+const VAR=[
+  {l:'Fly ash',a:250000},{l:'Gypsum',a:220000},{l:'Lime',a:300000},
+  {l:'Sand',a:40000},{l:'Electricity (variable)',a:30000},{l:'Direct labour',a:60000},
+];
+const BATCH=200000;
+const fmTotal=FIXED.reduce((s,x)=>s+x.a,0);
+const vbTotal=VAR.reduce((s,x)=>s+x.a,0);
+const DEP=7700000/5, INT=4000000*0.12;
+
+let S={price:7,vc:4.5,volume:2400000,fc:fmTotal*12,ti:3000000};
+
+/* ═══════════════════════════ FORMAT ═══════════════════════════ */
+const fC=n=>Number.isFinite(n)?`Rs ${Math.round(n).toLocaleString('en-IN')}`:'N/A';
+const fN=n=>Number.isFinite(n)?Math.round(n).toLocaleString('en-IN'):'N/A';
+const fP=n=>Number.isFinite(n)?`${n.toFixed(2)}%`:'N/A';
+
+/* ═══════════════════════════ CALC ═══════════════════════════ */
+function calc(){
+  const{price,vc,volume,fc,ti}=S;
+  const cm=price-vc,cmR=cm>0?(cm/price)*100:0;
+  const rev=price*volume,vCost=vc*volume,gp=rev-vCost;
+  const fAbs=fc+DEP,ebit=gp-fAbs,net=ebit-INT;
+  const bepU=cm>0?fAbs/cm:Infinity;
+  const bepR=isFinite(bepU)?bepU*price:Infinity;
+  const tgtU=cm>0?(fAbs+ti)/cm:Infinity;
+  const mosU=volume-bepU,mosP=volume>0?(mosU/volume)*100:0;
+  const rqP=volume>0?vc+fAbs/volume:Infinity;
+  const rqV=volume>0?price-fAbs/volume:-Infinity;
+  const cBep=isFinite(bepU)?(bepU/CAP)*100:Infinity;
+  const cTgt=isFinite(tgtU)?(tgtU/CAP)*100:Infinity;
+  return{cm,cmR,rev,vCost,gp,fAbs,ebit,net,bepU,bepR,tgtU,mosU,mosP,rqP,rqV,cBep,cTgt};
+}
+
+/* ═══════════════════════════ RENDER ═══════════════════════════ */
+function st(id,v){const e=document.getElementById(id);if(e)e.textContent=v}
+
+function render(){
+  const c=calc();
+
+  /* exec strip */
+  const eg=c.ebit>=0?'good':'bad';
+  document.getElementById('ec-ebit').className=`ecard ${eg}`;
+  document.getElementById('ev-ebit').className=`ecard-val ${eg}`;
+  st('ev-ebit',fC(c.ebit)); st('en-ebit',c.ebit>=0?'Profitable (absorption)':'Negative EBIT risk');
+  st('ev-bep',`${fN(c.bepU)} units`); st('en-bep',`${fP(c.cBep)} of capacity`);
+  st('ev-cm',`${fC(c.cm)} / unit`); st('en-cm',`${fP(c.cmR)} CM ratio`);
+  const tf=c.tgtU<=CAP;
+  document.getElementById('ec-tgt').className=`ecard ${tf?'good':'warn'}`;
+  document.getElementById('ev-tgt').className=`ecard-val ${tf?'good':'warn'}`;
+  st('ev-tgt',tf?'Capacity fit':'Capacity exceeded'); st('en-tgt',`${fN(c.tgtU)} units needed`);
+
+  /* gross */
+  st('gr-rev',fC(c.rev)); st('gr-vc',fC(c.vCost)); st('gr-gp',fC(c.gp));
+
+  /* metric trio */
+  const ec=c.ebit>=0?'good':'bad';
+  const nt=c.net>=0?'good':'warn';
+  setMC('mc-ebit','ms-ebit',fC(c.ebit),ec,`Gross ${fC(c.gp)} | Fixed+Dep ${fC(c.fAbs)}`);
+  setMC('mc-cm','ms-cm',`${fC(c.cm)} per brick`,'',`Total CM ${fC(c.gp)} | CM% ${fP(c.cmR)}`);
+  setMC('mc-net','ms-net',fC(c.net),nt,`EBIT ${fC(c.ebit)} | Interest ${fC(INT)}`);
+
+  /* q4 */
+  st('b-u',`${fN(c.bepU)} bricks`); st('b-uc',`${fP(c.cBep)} of plant capacity`);
+  st('b-r',fC(c.bepR)); st('b-rp',`At price Rs ${S.price.toFixed(2)}`);
+  st('b-m',`${fN(c.mosU)} bricks`); st('b-mp',`${fP(c.mosP)} of expected sales`);
+
+  /* q5 */
+  st('ti-v',fC(S.ti)); st('ti-u',`${fN(c.tgtU)} bricks`); st('ti-c',fP(c.cTgt));
+
+  /* verdict */
+  let tone,title,body;
+  if(c.cm<=0){tone='bad';title='No-go under current assumptions';body='Unit contribution margin is non-positive. Every additional brick destroys value.';}
+  else if(c.ebit<0){tone='warn';title='Conditional go (fix pricing/cost first)';body='Expected first-year EBIT is negative at baseline demand. The project needs corrective levers before launch.';}
+  else if(c.tgtU>CAP){tone='warn';title='Go with capacity constraint';body='Project is viable at baseline, but the target-profit plan breaches plant capacity.';}
+  else{tone='good';title='Go — financially feasible';body='Current assumptions support positive EBIT and a realistic path to the target income.';}
+  document.getElementById('verdict').className=`verdict ${tone}`;
+  st('vt',title); st('vb',body);
+
+  document.getElementById('fin-list').innerHTML=[
+    `EBIT (absorption): <b>${fC(c.ebit)}</b>`,
+    `To break even at current volume, price must be ≥ <b>Rs ${c.rqP.toFixed(2)}</b>.`,
+    `Or keep price at Rs ${S.price.toFixed(2)} and reduce VC to ≤ <b>Rs ${c.rqV.toFixed(2)}</b>.`,
+    `BEP requires <b>${fP(c.cBep)}</b> of annual capacity.`,
+  ].map(t=>`<li>${t}</li>`).join('');
+
+  renderChart(c);
+}
+
+function setMC(vi,si,val,tone,sub){
+  const e=document.getElementById(vi);
+  if(e){e.textContent=val;e.className=`mcard-val${tone?' '+tone:''}`;}
+  st(si,sub);
+}
+
+/* ═══════════════════════════ CVP CHART ═══════════════════════════ */
+function renderChart(c){
+  const svg=document.getElementById('cvp');
+  const W=860,H=360,P={t:24,r:24,b:54,l:80};
+  const iW=W-P.l-P.r,iH=H-P.t-P.b;
+  const{price,vc}=S;
+  const maxX=CAP;
+  const maxY=Math.max(price*maxX,c.fAbs+vc*maxX,c.rev,c.fAbs)*1.06;
+  const sx=v=>P.l+(v/maxX)*iW;
+  const sy=v=>P.t+iH-(v/maxY)*iH;
+
+  const r1=sx(0),r2=sy(0),r3=sx(maxX),r4=sy(price*maxX);
+  const c1=sx(0),c2=sy(c.fAbs),c3=sx(maxX),c4=sy(c.fAbs+vc*maxX);
+  const rLen=Math.hypot(r3-r1,r4-r2),cLen=Math.hypot(c3-c1,c4-c2);
+  const bepVis=isFinite(c.bepU)&&c.bepU>=0&&c.bepU<=maxX;
+  const bX=bepVis?sx(c.bepU):0,bY=bepVis?sy(c.bepR):0;
+
+  let h=`<defs>
+    <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4b8fff"/>
+      <stop offset="100%" stop-color="#28c4b4"/>
+    </linearGradient>
+    <linearGradient id="cg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e05454"/>
+      <stop offset="100%" stop-color="#e07228"/>
+    </linearGradient>
+  </defs>`;
+
+  /* grid */
+  [0,.25,.5,.75,1].forEach(r=>{
+    const y=P.t+iH*r,v=(maxY*(1-r)/1e6).toFixed(1);
+    h+=`<line x1="${P.l}" y1="${y}" x2="${W-P.r}" y2="${y}" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+    <text x="${P.l-8}" y="${y+4}" text-anchor="end" font-size="10" fill="rgba(255,255,255,0.2)" font-family="JetBrains Mono,monospace">${v}M</text>`;
+  });
+  [0,.2,.4,.6,.8,1].forEach(r=>{
+    const x=P.l+iW*r;
+    h+=`<line x1="${x}" y1="${P.t}" x2="${x}" y2="${H-P.b}" stroke="rgba(255,255,255,0.04)" stroke-width="1" stroke-dasharray="4 4"/>
+    <text x="${x}" y="${H-P.b+20}" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)" font-family="JetBrains Mono,monospace">${(maxX*r/1e6).toFixed(1)}M</text>`;
+  });
+
+  /* axes */
+  h+=`<line x1="${P.l}" y1="${P.t}" x2="${P.l}" y2="${H-P.b}" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+  <line x1="${P.l}" y1="${H-P.b}" x2="${W-P.r}" y2="${H-P.b}" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+  <text x="${P.l-52}" y="${P.t-8}" font-size="10" fill="rgba(255,255,255,0.3)" font-weight="600" font-family="DM Sans,sans-serif">Amount (Rs)</text>
+  <text x="${W-P.r-4}" y="${H-P.b+38}" font-size="10" fill="rgba(255,255,255,0.3)" text-anchor="end" font-weight="600" font-family="DM Sans,sans-serif">Annual output (bricks)</text>`;
+
+  /* fixed cost */
+  h+=`<line x1="${sx(0)}" y1="${sy(c.fAbs)}" x2="${sx(maxX)}" y2="${sy(c.fAbs)}" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="6 5"/>`;
+
+  /* revenue line */
+  h+=`<line class="chart-ln" data-len="${rLen}" x1="${r1}" y1="${r2}" x2="${r3}" y2="${r4}" stroke="url(#rg)" stroke-width="2.5" stroke-linecap="round"/>`;
+
+  /* cost line */
+  h+=`<line class="chart-ln" data-len="${cLen}" x1="${c1}" y1="${c2}" x2="${c3}" y2="${c4}" stroke="url(#cg)" stroke-width="2.5" stroke-linecap="round"/>`;
+
+  /* current volume */
+  const vx=sx(S.volume);
+  h+=`<line x1="${vx}" y1="${P.t}" x2="${vx}" y2="${H-P.b}" stroke="#4b8fff" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.4"/>
+  <circle cx="${vx}" cy="${sy(Math.max(price*S.volume,c.fAbs+vc*S.volume))}" r="4.5" fill="#4b8fff" opacity="0.85"/>`;
+
+  /* BEP */
+  if(bepVis){
+    h+=`<circle cx="${bX}" cy="${bY}" r="7" fill="#e8aa28" stroke="rgba(8,8,9,1)" stroke-width="2.5"/>
+    <text x="${bX}" y="${bY-13}" text-anchor="middle" font-size="10.5" fill="#e8aa28" font-weight="700" font-family="DM Sans,sans-serif">BEP</text>`;
+  }
+
+  svg.innerHTML=h;
+
+  /* animate lines */
+  requestAnimationFrame(()=>{
+    svg.querySelectorAll('.chart-ln').forEach((ln,i)=>{
+      const len=parseFloat(ln.dataset.len);
+      ln.style.strokeDasharray=len;
+      ln.style.strokeDashoffset=len;
+      setTimeout(()=>{
+        ln.style.transition=`stroke-dashoffset 1.1s cubic-bezier(0.22,1,0.36,1) ${i*0.12}s`;
+        ln.style.strokeDashoffset=0;
+      },80);
+    });
+  });
+}
+
+/* ═══════════════════════════ SLIDER ═══════════════════════════ */
+const slMap={price:{id:'lp',fmt:v=>v.toFixed(2)},vc:{id:'lv',fmt:v=>v.toFixed(2)},
+             volume:{id:'ll',fmt:v=>fN(v)},fc:{id:'lf',fmt:v=>fN(v)},ti:{id:'lt',fmt:v=>fN(v)}};
+
+function sl(el,key){
+  const v=Number(el.value);
+  S[key]=v;
+  const pct=((v-Number(el.min))/(Number(el.max)-Number(el.min)))*100;
+  el.style.setProperty('--fill',pct+'%');
+  const m=slMap[key];
+  if(m)st(m.id,m.fmt(v));
+  render();
+}
+
+function resetToCase(){
+  S={price:7,vc:4.5,volume:2400000,fc:fmTotal*12,ti:3000000};
+  const ids={price:'s-price',vc:'s-vc',volume:'s-vol',fc:'s-fc',ti:'s-ti'};
+  Object.entries(ids).forEach(([k,id])=>{
+    const el=document.getElementById(id);
+    if(el){el.value=S[k];sl(el,k);}
+  });
+}
+
+/* ═══════════════════════════ TABLES ═══════════════════════════ */
+function buildTables(){
+  const ftb=document.getElementById('t-fixed');
+  FIXED.forEach(r=>{
+    ftb.insertAdjacentHTML('beforeend',`<tr><td>${r.l}</td><td>${fC(r.a)}</td><td>${fC(r.a*12)}</td></tr>`);
+  });
+  document.getElementById('t-fixed-f').innerHTML=
+    `<tr><td>Total fixed operating</td><td>${fC(fmTotal)}</td><td>${fC(fmTotal*12)}</td></tr>`;
+  const vtb=document.getElementById('t-var');
+  VAR.forEach(r=>{
+    vtb.insertAdjacentHTML('beforeend',`<tr><td>${r.l}</td><td>${fC(r.a)}</td><td>${(r.a/BATCH).toFixed(2)}</td></tr>`);
+  });
+  document.getElementById('t-var-f').innerHTML=
+    `<tr><td>Total variable cost</td><td>${fC(vbTotal)}</td><td>${(vbTotal/BATCH).toFixed(2)}</td></tr>`;
+}
+
+/* ═══════════════════════════ REVEAL ═══════════════════════════ */
+function initReveal(){
+  const els=document.querySelectorAll('.r');
+  const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  if(reduced){els.forEach(e=>e.classList.add('on'));return}
+  const obs=new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('on');obs.unobserve(e.target);}});
+  },{threshold:0.06,rootMargin:'0px 0px -5% 0px'});
+  els.forEach(e=>obs.observe(e));
+}
+
+/* ═══════════════════════════ NAV SCROLL ═══════════════════════════ */
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',scrollY>16);
+},{passive:true});
+
+/* ═══════════════════════════ INIT ═══════════════════════════ */
+document.addEventListener('DOMContentLoaded',()=>{
+  /* init slider fills */
+  const sliders=[
+    {id:'s-price',min:5,max:10,v:S.price,k:'price'},
+    {id:'s-vc',min:3,max:7,v:S.vc,k:'vc'},
+    {id:'s-vol',min:1200000,max:4000000,v:S.volume,k:'volume'},
+    {id:'s-fc',min:4000000,max:7000000,v:S.fc,k:'fc'},
+    {id:'s-ti',min:1000000,max:6000000,v:S.ti,k:'ti'},
+  ];
+  sliders.forEach(({id,min,max,v,k})=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.value=v;
+    el.style.setProperty('--fill',((v-min)/(max-min))*100+'%');
+    const m=slMap[k];
+    if(m)st(m.id,m.fmt(v));
+  });
+  buildTables();
+  render();
+  initReveal();
+});
+</script>
+</body>
 </html>
