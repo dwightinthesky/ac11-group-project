@@ -68,6 +68,60 @@
   --nav-h: 60px;
   --ease: cubic-bezier(0.22,1,0.36,1);
   --ease-in: cubic-bezier(0.4,0,1,1);
+
+  /* Theme-aware utility colors */
+  --noise-opacity: 0.028;
+  --orb-a: rgba(224,114,40,0.10);
+  --orb-b: rgba(40,196,180,0.07);
+  --nav-scrolled-bg: rgba(8,8,9,0.85);
+
+  --chart-grid: rgba(255,255,255,0.04);
+  --chart-label: rgba(255,255,255,0.2);
+  --chart-axis: rgba(255,255,255,0.1);
+  --chart-axis-label: rgba(255,255,255,0.3);
+  --chart-fixed: rgba(255,255,255,0.15);
+  --chart-bep-stroke: rgba(8,8,9,1);
+}
+
+html[data-theme="light"]{
+  --bg-0: #f6f7fb;
+  --bg-1: #ffffff;
+  --bg-2: #f2f4f9;
+  --bg-3: #ebeff7;
+  --bg-4: #dde3ee;
+
+  --w-100: #0f1623;
+  --w-80: rgba(15,22,35,0.82);
+  --w-50: rgba(15,22,35,0.56);
+  --w-20: rgba(15,22,35,0.24);
+  --w-08: rgba(15,22,35,0.10);
+  --w-04: rgba(15,22,35,0.05);
+
+  --a: #cf6523;
+  --a-hi: #e07228;
+  --a-lo: rgba(207,101,35,0.14);
+  --a-xs: rgba(207,101,35,0.08);
+
+  --green: #19945f;
+  --green-lo: rgba(25,148,95,0.12);
+  --red: #bf4848;
+  --red-lo: rgba(191,72,72,0.12);
+  --amber: #be8a1d;
+  --amber-lo: rgba(190,138,29,0.12);
+  --teal: #1b9f92;
+  --teal-lo: rgba(27,159,146,0.12);
+
+  --noise-opacity: 0.016;
+  --orb-a: rgba(224,114,40,0.09);
+  --orb-b: rgba(40,196,180,0.07);
+  --nav-scrolled-bg: rgba(246,247,251,0.9);
+
+  --chart-grid: rgba(15,22,35,0.08);
+  --chart-label: rgba(15,22,35,0.5);
+  --chart-axis: rgba(15,22,35,0.16);
+  --chart-axis-label: rgba(15,22,35,0.62);
+  --chart-fixed: rgba(15,22,35,0.3);
+  --chart-bep-stroke: rgba(246,247,251,1);
 }
 
 /* ── RESET ── */
@@ -88,7 +142,7 @@ body{
 body::before{
   content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
-  opacity:0.028;
+  opacity:var(--noise-opacity);
 }
 
 /* ── GLOW ORBS — pure CSS, zero image payload ── */
@@ -98,12 +152,12 @@ body::before{
 }
 .orb-a{
   width:480px;height:480px;
-  background:radial-gradient(circle,rgba(224,114,40,0.10) 0%,transparent 70%);
+  background:radial-gradient(circle,var(--orb-a) 0%,transparent 70%);
   top:-80px;right:-80px;
 }
 .orb-b{
   width:360px;height:360px;
-  background:radial-gradient(circle,rgba(40,196,180,0.07) 0%,transparent 70%);
+  background:radial-gradient(circle,var(--orb-b) 0%,transparent 70%);
   bottom:20%;left:-60px;
 }
 
@@ -119,7 +173,7 @@ nav{
   border-bottom:1px solid transparent;
 }
 nav.scrolled{
-  background:rgba(8,8,9,0.85);
+  background:var(--nav-scrolled-bg);
   border-color:var(--w-08);
   backdrop-filter:blur(20px) saturate(1.4);
   -webkit-backdrop-filter:blur(20px) saturate(1.4);
@@ -147,6 +201,27 @@ nav.scrolled{
   transition:color 0.2s;
 }
 .nav-links a:hover{color:var(--w-100)}
+
+.nav-actions{
+  display:flex;align-items:center;gap:10px;
+}
+
+.theme-toggle{
+  display:inline-flex;align-items:center;gap:7px;
+  border:1px solid var(--w-08);
+  background:var(--w-04);
+  color:var(--w-50);
+  font-family:var(--f-body);font-size:var(--t-label);font-weight:600;
+  letter-spacing:0.05em;text-transform:uppercase;
+  border-radius:100px;padding:8px 12px;cursor:pointer;
+  transition:border-color 0.2s,color 0.2s,background 0.2s;
+}
+.theme-toggle svg{width:13px;height:13px;flex-shrink:0}
+.theme-toggle:hover{
+  border-color:var(--w-20);
+  color:var(--w-100);
+  background:var(--w-08);
+}
 
 /* SINGLE CTA token — only one style site-wide */
 .cta{
@@ -656,6 +731,10 @@ tfoot td:not(:first-child){text-align:right}
   nav{padding:0 var(--s3)}
   .nav-links{display:none}
   .nav-menu-btn{display:block}
+  .nav-actions{gap:8px}
+  .theme-toggle span{display:none}
+  .theme-toggle{padding:8px}
+  .nav-actions .cta{display:none}
   .hero{padding:calc(var(--nav-h) + var(--s6)) var(--s3) var(--s6)}
   .qstrip{padding:var(--s3);flex-direction:column;align-items:flex-start}
   .sec{padding:var(--s5) var(--s3)}
@@ -675,6 +754,20 @@ tfoot td:not(:first-child){text-align:right}
   .chart-ln{stroke-dashoffset:0!important}
 }
 </style>
+<script>
+(() => {
+  try {
+    const t = localStorage.getItem('ac11-theme');
+    if (t === 'dark' || t === 'light') {
+      document.documentElement.setAttribute('data-theme', t);
+      return;
+    }
+  } catch (_) {}
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
+})();
+</script>
 </head>
 <body>
 
@@ -696,14 +789,23 @@ tfoot td:not(:first-child){text-align:right}
     <li><a href="#">CVP Graph</a></li>
     <li><a href="#">Recommendation</a></li>
   </ul>
-  <!-- Single CTA token — no repetition (analysis: fix CTA button repetition) -->
-  <button class="cta" onclick="document.querySelector('.layout').scrollIntoView({behavior:'smooth'})">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-    Jump to Analysis
-  </button>
-  <button class="nav-menu-btn" aria-label="Menu" onclick="this.classList.toggle('open')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-  </button>
+  <div class="nav-actions">
+    <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark/light mode">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 3a1 1 0 0 1 1 1v1a1 1 0 0 1-2 0V4a1 1 0 0 1 1-1zM12 18a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/>
+        <path d="M3 12a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1zm14-7.07a1 1 0 0 1 1.41 0l.7.7a1 1 0 0 1-1.41 1.42l-.7-.71a1 1 0 0 1 0-1.41zM17.66 16.95a1 1 0 0 1 1.41 0l.7.7a1 1 0 0 1-1.41 1.42l-.7-.71a1 1 0 0 1 0-1.41zM3.51 5.63a1 1 0 0 1 1.41 0l.7.7A1 1 0 0 1 4.21 7.74l-.7-.71a1 1 0 0 1 0-1.4zM3.51 18.37a1 1 0 0 1 0-1.42l.7-.7a1 1 0 1 1 1.41 1.42l-.7.7a1 1 0 0 1-1.41 0zM19 12a1 1 0 0 1 1-1h1a1 1 0 1 1 0 2h-1a1 1 0 0 1-1-1z"/>
+      </svg>
+      <span>Theme</span>
+    </button>
+    <!-- Single CTA token — no repetition (analysis: fix CTA button repetition) -->
+    <button class="cta" onclick="document.querySelector('.layout').scrollIntoView({behavior:'smooth'})">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+      Jump to Analysis
+    </button>
+    <button class="nav-menu-btn" aria-label="Menu" onclick="this.classList.toggle('open')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+  </div>
 </nav>
 
 <!-- ───────────── HERO ───────────── -->
@@ -1000,6 +1102,45 @@ let S={price:7,vc:4.5,volume:2400000,fc:fmTotal*12,ti:3000000};
 const fC=n=>Number.isFinite(n)?`Rs ${Math.round(n).toLocaleString('en-IN')}`:'N/A';
 const fN=n=>Number.isFinite(n)?Math.round(n).toLocaleString('en-IN'):'N/A';
 const fP=n=>Number.isFinite(n)?`${n.toFixed(2)}%`:'N/A';
+const cssVar=(name,fallback='')=>getComputedStyle(document.documentElement).getPropertyValue(name).trim()||fallback;
+
+/* ═══════════════════════════ THEME ═══════════════════════════ */
+const THEME_KEY='ac11-theme';
+
+function setTheme(theme,{persist=true,refresh=false}={}){
+  document.documentElement.setAttribute('data-theme',theme);
+
+  const btn=document.getElementById('theme-toggle');
+  if(btn){
+    const nextLabel=theme==='dark'?'Light mode':'Dark mode';
+    btn.querySelector('span').textContent=nextLabel;
+    btn.setAttribute('aria-label',`Switch to ${nextLabel.toLowerCase()}`);
+    btn.setAttribute('aria-pressed',theme==='light'?'true':'false');
+  }
+
+  if(persist){
+    try{localStorage.setItem(THEME_KEY,theme);}catch(_){}
+  }
+  if(refresh)render();
+}
+
+function initThemeToggle(){
+  let initial='dark';
+  try{
+    const saved=localStorage.getItem(THEME_KEY);
+    if(saved==='dark'||saved==='light')initial=saved;
+    else if(matchMedia('(prefers-color-scheme: light)').matches)initial='light';
+  }catch(_){}
+
+  setTheme(initial,{persist:false,refresh:false});
+
+  const btn=document.getElementById('theme-toggle');
+  if(!btn)return;
+  btn.addEventListener('click',()=>{
+    const current=document.documentElement.getAttribute('data-theme')==='light'?'light':'dark';
+    setTheme(current==='dark'?'light':'dark',{persist:true,refresh:true});
+  });
+}
 
 /* ═══════════════════════════ CALC ═══════════════════════════ */
 function calc(){
@@ -1095,6 +1236,12 @@ function renderChart(c){
   const rLen=Math.hypot(r3-r1,r4-r2),cLen=Math.hypot(c3-c1,c4-c2);
   const bepVis=isFinite(c.bepU)&&c.bepU>=0&&c.bepU<=maxX;
   const bX=bepVis?sx(c.bepU):0,bY=bepVis?sy(c.bepR):0;
+  const chartGrid=cssVar('--chart-grid','rgba(255,255,255,0.04)');
+  const chartLabel=cssVar('--chart-label','rgba(255,255,255,0.2)');
+  const chartAxis=cssVar('--chart-axis','rgba(255,255,255,0.1)');
+  const chartAxisLabel=cssVar('--chart-axis-label','rgba(255,255,255,0.3)');
+  const chartFixed=cssVar('--chart-fixed','rgba(255,255,255,0.15)');
+  const chartBepStroke=cssVar('--chart-bep-stroke','rgba(8,8,9,1)');
 
   let h=`<defs>
     <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -1110,23 +1257,23 @@ function renderChart(c){
   /* grid */
   [0,.25,.5,.75,1].forEach(r=>{
     const y=P.t+iH*r,v=(maxY*(1-r)/1e6).toFixed(1);
-    h+=`<line x1="${P.l}" y1="${y}" x2="${W-P.r}" y2="${y}" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-    <text x="${P.l-8}" y="${y+4}" text-anchor="end" font-size="10" fill="rgba(255,255,255,0.2)" font-family="JetBrains Mono,monospace">${v}M</text>`;
+    h+=`<line x1="${P.l}" y1="${y}" x2="${W-P.r}" y2="${y}" stroke="${chartGrid}" stroke-width="1"/>
+    <text x="${P.l-8}" y="${y+4}" text-anchor="end" font-size="10" fill="${chartLabel}" font-family="JetBrains Mono,monospace">${v}M</text>`;
   });
   [0,.2,.4,.6,.8,1].forEach(r=>{
     const x=P.l+iW*r;
-    h+=`<line x1="${x}" y1="${P.t}" x2="${x}" y2="${H-P.b}" stroke="rgba(255,255,255,0.04)" stroke-width="1" stroke-dasharray="4 4"/>
-    <text x="${x}" y="${H-P.b+20}" text-anchor="middle" font-size="10" fill="rgba(255,255,255,0.2)" font-family="JetBrains Mono,monospace">${(maxX*r/1e6).toFixed(1)}M</text>`;
+    h+=`<line x1="${x}" y1="${P.t}" x2="${x}" y2="${H-P.b}" stroke="${chartGrid}" stroke-width="1" stroke-dasharray="4 4"/>
+    <text x="${x}" y="${H-P.b+20}" text-anchor="middle" font-size="10" fill="${chartLabel}" font-family="JetBrains Mono,monospace">${(maxX*r/1e6).toFixed(1)}M</text>`;
   });
 
   /* axes */
-  h+=`<line x1="${P.l}" y1="${P.t}" x2="${P.l}" y2="${H-P.b}" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
-  <line x1="${P.l}" y1="${H-P.b}" x2="${W-P.r}" y2="${H-P.b}" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
-  <text x="${P.l-52}" y="${P.t-8}" font-size="10" fill="rgba(255,255,255,0.3)" font-weight="600" font-family="DM Sans,sans-serif">Amount (Rs)</text>
-  <text x="${W-P.r-4}" y="${H-P.b+38}" font-size="10" fill="rgba(255,255,255,0.3)" text-anchor="end" font-weight="600" font-family="DM Sans,sans-serif">Annual output (bricks)</text>`;
+  h+=`<line x1="${P.l}" y1="${P.t}" x2="${P.l}" y2="${H-P.b}" stroke="${chartAxis}" stroke-width="1.5"/>
+  <line x1="${P.l}" y1="${H-P.b}" x2="${W-P.r}" y2="${H-P.b}" stroke="${chartAxis}" stroke-width="1.5"/>
+  <text x="${P.l-52}" y="${P.t-8}" font-size="10" fill="${chartAxisLabel}" font-weight="600" font-family="DM Sans,sans-serif">Amount (Rs)</text>
+  <text x="${W-P.r-4}" y="${H-P.b+38}" font-size="10" fill="${chartAxisLabel}" text-anchor="end" font-weight="600" font-family="DM Sans,sans-serif">Annual output (bricks)</text>`;
 
   /* fixed cost */
-  h+=`<line x1="${sx(0)}" y1="${sy(c.fAbs)}" x2="${sx(maxX)}" y2="${sy(c.fAbs)}" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="6 5"/>`;
+  h+=`<line x1="${sx(0)}" y1="${sy(c.fAbs)}" x2="${sx(maxX)}" y2="${sy(c.fAbs)}" stroke="${chartFixed}" stroke-width="1.5" stroke-dasharray="6 5"/>`;
 
   /* revenue line */
   h+=`<line class="chart-ln" data-len="${rLen}" x1="${r1}" y1="${r2}" x2="${r3}" y2="${r4}" stroke="url(#rg)" stroke-width="2.5" stroke-linecap="round"/>`;
@@ -1141,7 +1288,7 @@ function renderChart(c){
 
   /* BEP */
   if(bepVis){
-    h+=`<circle cx="${bX}" cy="${bY}" r="7" fill="#e8aa28" stroke="rgba(8,8,9,1)" stroke-width="2.5"/>
+    h+=`<circle cx="${bX}" cy="${bY}" r="7" fill="#e8aa28" stroke="${chartBepStroke}" stroke-width="2.5"/>
     <text x="${bX}" y="${bY-13}" text-anchor="middle" font-size="10.5" fill="#e8aa28" font-weight="700" font-family="DM Sans,sans-serif">BEP</text>`;
   }
 
@@ -1218,6 +1365,8 @@ window.addEventListener('scroll',()=>{
 
 /* ═══════════════════════════ INIT ═══════════════════════════ */
 document.addEventListener('DOMContentLoaded',()=>{
+  initThemeToggle();
+
   /* init slider fills */
   const sliders=[
     {id:'s-price',min:5,max:10,v:S.price,k:'price'},
