@@ -228,6 +228,110 @@ html[data-theme="dark"] .theme-toggle .ico-moon{display:none}
 html[data-theme="light"] .theme-toggle .ico-sun{display:none}
 html[data-theme="light"] .theme-toggle .ico-moon{display:block}
 
+.pdf-export-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--bg-2);color:var(--w-80);
+  border:1px solid var(--w-08);border-radius:999px;
+  padding:8px 12px;font-size:var(--t-label);font-weight:600;
+  letter-spacing:0.02em;cursor:pointer;font-family:var(--f-body);
+  transition:border-color 0.2s, background 0.2s, color 0.2s, opacity 0.2s;
+}
+.pdf-export-btn:hover{
+  border-color:var(--w-20);
+  background:var(--bg-3);
+  color:var(--w-100);
+}
+.pdf-export-btn svg{
+  width:14px;height:14px;flex-shrink:0;
+}
+.pdf-export-btn.is-loading,
+.pdf-export-btn[disabled]{
+  opacity:0.75;
+  cursor:progress;
+}
+
+.pdf-export-root{
+  --bg-0: #f4f7fc;
+  --bg-1: #ffffff;
+  --bg-2: #edf2fa;
+  --bg-3: #e4ebf6;
+  --bg-4: #d7e1ef;
+  --w-100: #0f172a;
+  --w-80: rgba(15,23,42,0.84);
+  --w-50: rgba(15,23,42,0.62);
+  --w-20: rgba(15,23,42,0.24);
+  --w-08: rgba(15,23,42,0.10);
+  --w-04: rgba(15,23,42,0.05);
+  --a: #d96824;
+  --a-hi: #ea7d34;
+  --a-lo: rgba(217,104,36,0.12);
+  --a-xs: rgba(217,104,36,0.06);
+  --green: #12945f;
+  --green-lo: rgba(18,148,95,0.12);
+  --red: #c93f3f;
+  --red-lo: rgba(201,63,63,0.12);
+  --amber: #a86d05;
+  --amber-lo: rgba(168,109,5,0.12);
+  --teal: #0f9081;
+  --teal-lo: rgba(15,144,129,0.12);
+  position:fixed;
+  left:-200vw;
+  top:0;
+  width:1200px;
+  background:#fff;
+  color:var(--w-80);
+  padding:28px;
+  z-index:-1;
+}
+.pdf-export-head{
+  border:1px solid var(--w-08);
+  border-radius:var(--r-md);
+  background:var(--bg-1);
+  padding:16px 18px;
+  margin-bottom:16px;
+}
+.pdf-export-head h1{
+  color:var(--w-100);
+  font-family:var(--f-disp);
+  font-size:1.35rem;
+  letter-spacing:-0.02em;
+  margin-bottom:5px;
+}
+.pdf-export-head p{
+  color:var(--w-50);
+  font-size:0.78rem;
+  font-family:var(--f-mono);
+}
+.pdf-export-root .hero{
+  padding:var(--s5) var(--s5) var(--s5);
+}
+.pdf-export-root .qstrip{
+  padding:var(--s3) var(--s5);
+}
+.pdf-export-root .layout{
+  grid-template-columns:1fr;
+}
+.pdf-export-root .controls{
+  position:static;
+  height:auto;
+  border-right:none;
+  border-bottom:1px solid var(--w-08);
+}
+.pdf-export-root .sec{
+  padding:var(--s5) var(--s5);
+}
+.pdf-export-root .foot{
+  padding:var(--s3) var(--s5);
+}
+.pdf-export-root .r{
+  opacity:1!important;
+  transform:none!important;
+}
+.pdf-export-root .chart-ln{
+  transition:none!important;
+  stroke-dashoffset:0!important;
+}
+
 /* SINGLE CTA token — only one style site-wide */
 .cta{
   display:inline-flex;align-items:center;gap:var(--s1);
@@ -738,6 +842,8 @@ tfoot td:not(:first-child){text-align:right}
   .nav-actions{gap:var(--s1)}
   .theme-toggle{padding:8px 10px;border-radius:10px}
   .theme-toggle span{display:none}
+  .pdf-export-btn{padding:8px 10px;border-radius:10px}
+  .pdf-export-btn span{display:none}
   .cta{display:none}
   .nav-menu-btn{display:block}
   .hero{padding:calc(var(--nav-h) + var(--s6)) var(--s3) var(--s6)}
@@ -791,6 +897,14 @@ tfoot td:not(:first-child){text-align:right}
       </svg>
       <span id="theme-toggle-label">Dark mode</span>
     </button>
+    <button id="pdf-export-btn" class="pdf-export-btn" type="button" aria-label="Export report as PDF" onclick="exportPdfReport()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M7 2h7l5 5v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"></path>
+        <path d="M14 2v6h6"></path>
+        <path d="M8 13h8M8 17h8"></path>
+      </svg>
+      <span id="pdf-export-label">Export PDF</span>
+    </button>
     <!-- Single CTA token — no repetition (analysis: fix CTA button repetition) -->
     <button class="cta" onclick="document.querySelector('.layout').scrollIntoView({behavior:'smooth'})">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
@@ -802,6 +916,7 @@ tfoot td:not(:first-child){text-align:right}
   </div>
 </nav>
 
+<main id="report-content">
 <!-- ───────────── HERO ───────────── -->
 <section class="hero">
   <div class="hero-inner">
@@ -1070,7 +1185,9 @@ tfoot td:not(:first-child){text-align:right}
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
   <p>This dashboard uses the case exhibits for fixed/variable cost classification and adds sensitivity controls for managerial decision testing. All computations follow absorption costing methodology.</p>
 </footer>
+</main>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 /* ═══════════════════════════ DATA ═══════════════════════════ */
 const CAP = 4000000;
@@ -1308,6 +1425,83 @@ function renderChart(c){
       },80);
     });
   });
+}
+
+/* ═══════════════════════════ PDF EXPORT ═══════════════════════════ */
+function fDT(d=new Date()){
+  return d.toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'});
+}
+
+function setPdfBusy(busy){
+  const btn=document.getElementById('pdf-export-btn');
+  const label=document.getElementById('pdf-export-label');
+  if(!btn||!label)return;
+  btn.disabled=busy;
+  btn.classList.toggle('is-loading',busy);
+  btn.setAttribute('aria-busy',busy?'true':'false');
+  label.textContent=busy?'Generating...':'Export PDF';
+}
+
+function rmNode(node){
+  if(node&&node.parentNode)node.parentNode.removeChild(node);
+}
+
+function exportPdfReport(){
+  const btn=document.getElementById('pdf-export-btn');
+  if(btn&&btn.disabled)return;
+
+  const source=document.getElementById('report-content');
+  if(!source){
+    alert('Report content not found.');
+    return;
+  }
+
+  const c=calc();
+  const shell=document.createElement('section');
+  shell.className='pdf-export-root';
+  shell.innerHTML=`<div class="pdf-export-head">
+    <h1>AC11 Fly Ash Brick Decision Report</h1>
+    <p>Generated on ${fDT()}</p>
+    <p>Price Rs ${S.price.toFixed(2)} · VC Rs ${S.vc.toFixed(2)} · Volume ${fN(S.volume)} bricks · Fixed ${fC(S.fc)} · EBIT ${fC(c.ebit)}</p>
+  </div>`;
+
+  const clone=source.cloneNode(true);
+  clone.querySelectorAll('.r').forEach(el=>el.classList.add('on'));
+  clone.querySelectorAll('#pdf-export-btn,.theme-toggle,.nav-menu-btn').forEach(el=>rmNode(el));
+  shell.appendChild(clone);
+  document.body.appendChild(shell);
+  setPdfBusy(true);
+
+  const cleanup=()=>{
+    rmNode(shell);
+    setPdfBusy(false);
+  };
+
+  if(!window.html2pdf){
+    cleanup();
+    window.print();
+    return;
+  }
+
+  const options={
+    margin:[8,8,10,8],
+    filename:`ac11-flyash-report-${new Date().toISOString().slice(0,10)}.pdf`,
+    image:{type:'jpeg',quality:0.97},
+    html2canvas:{scale:2,useCORS:true,backgroundColor:'#ffffff',windowWidth:1200,scrollX:0,scrollY:0},
+    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+    pagebreak:{mode:['css','legacy']}
+  };
+
+  window.html2pdf()
+    .set(options)
+    .from(shell)
+    .save()
+    .then(cleanup)
+    .catch(err=>{
+      console.error('PDF export failed:',err);
+      cleanup();
+      alert('PDF export failed. Please try again.');
+    });
 }
 
 /* ═══════════════════════════ SLIDER ═══════════════════════════ */
