@@ -250,7 +250,7 @@ html[data-theme="light"] .theme-toggle .ico-moon{display:block}
   cursor:progress;
 }
 
-.pdf-export-root{
+html.pdf-capture-mode{
   --bg-0: #f4f7fc;
   --bg-1: #ffffff;
   --bg-2: #edf2fa;
@@ -274,14 +274,9 @@ html[data-theme="light"] .theme-toggle .ico-moon{display:block}
   --amber-lo: rgba(168,109,5,0.12);
   --teal: #0f9081;
   --teal-lo: rgba(15,144,129,0.12);
-  position:fixed;
-  left:-200vw;
-  top:0;
-  width:1200px;
-  background:#fff;
-  color:var(--w-80);
-  padding:28px;
-  z-index:-1;
+}
+html.pdf-capture-mode body{
+  background:#ffffff;
 }
 .pdf-export-head{
   border:1px solid var(--w-08);
@@ -302,32 +297,35 @@ html[data-theme="light"] .theme-toggle .ico-moon{display:block}
   font-size:0.78rem;
   font-family:var(--f-mono);
 }
-.pdf-export-root .hero{
+html.pdf-capture-mode .pdf-export-head p + p{
+  margin-top:5px;
+}
+html.pdf-capture-mode .hero{
   padding:var(--s5) var(--s5) var(--s5);
 }
-.pdf-export-root .qstrip{
+html.pdf-capture-mode .qstrip{
   padding:var(--s3) var(--s5);
 }
-.pdf-export-root .layout{
+html.pdf-capture-mode .layout{
   grid-template-columns:1fr;
 }
-.pdf-export-root .controls{
+html.pdf-capture-mode .controls{
   position:static;
   height:auto;
   border-right:none;
   border-bottom:1px solid var(--w-08);
 }
-.pdf-export-root .sec{
+html.pdf-capture-mode .sec{
   padding:var(--s5) var(--s5);
 }
-.pdf-export-root .foot{
+html.pdf-capture-mode .foot{
   padding:var(--s3) var(--s5);
 }
-.pdf-export-root .r{
+html.pdf-capture-mode .r{
   opacity:1!important;
   transform:none!important;
 }
-.pdf-export-root .chart-ln{
+html.pdf-capture-mode .chart-ln{
   transition:none!important;
   stroke-dashoffset:0!important;
 }
@@ -1442,10 +1440,6 @@ function setPdfBusy(busy){
   label.textContent=busy?'Generating...':'Export PDF';
 }
 
-function rmNode(node){
-  if(node&&node.parentNode)node.parentNode.removeChild(node);
-}
-
 function exportPdfReport(){
   const btn=document.getElementById('pdf-export-btn');
   if(btn&&btn.disabled)return;
@@ -1457,23 +1451,33 @@ function exportPdfReport(){
   }
 
   const c=calc();
-  const shell=document.createElement('section');
-  shell.className='pdf-export-root';
-  shell.innerHTML=`<div class="pdf-export-head">
+  const root=document.documentElement;
+  const activeTheme=root.dataset.theme==='light'?'light':'dark';
+  const revealNodes=Array.from(source.querySelectorAll('.r'));
+  const revealState=revealNodes.map(el=>el.classList.contains('on'));
+  const head=document.createElement('section');
+  head.className='pdf-export-head';
+  head.innerHTML=`
     <h1>AC11 Fly Ash Brick Decision Report</h1>
     <p>Generated on ${fDT()}</p>
     <p>Price Rs ${S.price.toFixed(2)} · VC Rs ${S.vc.toFixed(2)} · Volume ${fN(S.volume)} bricks · Fixed ${fC(S.fc)} · EBIT ${fC(c.ebit)}</p>
-  </div>`;
+  `;
 
-  const clone=source.cloneNode(true);
-  clone.querySelectorAll('.r').forEach(el=>el.classList.add('on'));
-  clone.querySelectorAll('#pdf-export-btn,.theme-toggle,.nav-menu-btn').forEach(el=>rmNode(el));
-  shell.appendChild(clone);
-  document.body.appendChild(shell);
+  source.prepend(head);
+  revealNodes.forEach(el=>el.classList.add('on'));
+  root.classList.add('pdf-capture-mode');
+  applyTheme('light');
+  render();
   setPdfBusy(true);
 
   const cleanup=()=>{
-    rmNode(shell);
+    if(head.parentNode)head.parentNode.removeChild(head);
+    revealNodes.forEach((el,i)=>{
+      if(!revealState[i])el.classList.remove('on');
+    });
+    root.classList.remove('pdf-capture-mode');
+    applyTheme(activeTheme);
+    render();
     setPdfBusy(false);
   };
 
@@ -1492,16 +1496,24 @@ function exportPdfReport(){
     pagebreak:{mode:['css','legacy']}
   };
 
-  window.html2pdf()
-    .set(options)
-    .from(shell)
-    .save()
-    .then(cleanup)
-    .catch(err=>{
-      console.error('PDF export failed:',err);
-      cleanup();
-      alert('PDF export failed. Please try again.');
+  setTimeout(()=>{
+    source.querySelectorAll('.chart-ln').forEach(ln=>{
+      ln.style.transition='none';
+      ln.style.strokeDasharray='none';
+      ln.style.strokeDashoffset='0';
     });
+
+    window.html2pdf()
+      .set(options)
+      .from(source)
+      .save()
+      .then(cleanup)
+      .catch(err=>{
+        console.error('PDF export failed:',err);
+        cleanup();
+        alert('PDF export failed. Please try again.');
+      });
+  },220);
 }
 
 /* ═══════════════════════════ SLIDER ═══════════════════════════ */
