@@ -821,7 +821,7 @@ tfoot td:not(:first-child){text-align:right}
         <path d="M14 2v6h6"></path>
         <path d="M8 13h8M8 17h8"></path>
       </svg>
-      <span id="pdf-export-label">Download PDF</span>
+      <span id="pdf-export-label">Export PDF</span>
     </button>
     <!-- Single CTA token — no repetition (analysis: fix CTA button repetition) -->
     <button class="cta" onclick="document.querySelector('.layout').scrollIntoView({behavior:'smooth'})">
@@ -1105,6 +1105,8 @@ tfoot td:not(:first-child){text-align:right}
 </footer>
 </main>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script>
 /* ═══════════════════════════ DATA ═══════════════════════════ */
 const CAP = 4000000;
@@ -1352,31 +1354,287 @@ function setPdfBusy(busy){
   btn.disabled=busy;
   btn.classList.toggle('is-loading',busy);
   btn.setAttribute('aria-busy',busy?'true':'false');
-  label.textContent=busy?'Preparing...':'Download PDF';
+  label.textContent=busy?'Generating...':'Export PDF';
 }
 
-function exportPdfReport(){
+function pdfVerdict(c){
+  if(c.cm<=0){
+    return{
+      tone:'bad',
+      title:'No-go under current assumptions',
+      body:'Unit contribution margin is non-positive. Every additional brick destroys value.'
+    };
+  }
+  if(c.ebit<0){
+    return{
+      tone:'warn',
+      title:'Conditional go (fix pricing/cost first)',
+      body:'Expected first-year EBIT is negative at baseline demand. The project needs corrective levers before launch.'
+    };
+  }
+  if(c.tgtU>CAP){
+    return{
+      tone:'warn',
+      title:'Go with capacity constraint',
+      body:'Project is viable at baseline, but the target-profit plan breaches plant capacity.'
+    };
+  }
+  return{
+    tone:'good',
+    title:'Go - financially feasible',
+    body:'Current assumptions support positive EBIT and a realistic path to the target income.'
+  };
+}
+
+async function chartSvgToPngDataUrl(){
+  const svg=document.getElementById('cvp');
+  if(!svg)return null;
+
+  const vb=svg.viewBox&&svg.viewBox.baseVal;
+  const width=Math.max(860,Math.round((vb&&vb.width)||svg.clientWidth||860));
+  const height=Math.max(360,Math.round((vb&&vb.height)||svg.clientHeight||360));
+
+  const cloned=svg.cloneNode(true);
+  cloned.setAttribute('xmlns','http://www.w3.org/2000/svg');
+  cloned.setAttribute('width',String(width));
+  cloned.setAttribute('height',String(height));
+  const svgText=new XMLSerializer().serializeToString(cloned);
+  const svgData=`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgText)}`;
+
+  const img=await new Promise((resolve,reject)=>{
+    const i=new Image();
+    i.onload=()=>resolve(i);
+    i.onerror=reject;
+    i.src=svgData;
+  });
+
+  const scale=2;
+  const canvas=document.createElement('canvas');
+  canvas.width=width*scale;
+  canvas.height=height*scale;
+  const ctx=canvas.getContext('2d');
+  if(!ctx)return null;
+  ctx.fillStyle='#ffffff';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.drawImage(img,0,0,canvas.width,canvas.height);
+  return canvas.toDataURL('image/png',0.95);
+}
+
+async function exportPdfReport(){
   const btn=document.getElementById('pdf-export-btn');
   if(btn&&btn.disabled)return;
   setPdfBusy(true);
-  const url='/ac11-flyash-report.pdf';
 
-  fetch(url,{method:'HEAD',cache:'no-store'})
-    .then(res=>{
-      if(!res.ok) throw new Error('PDF not found');
-      const a=document.createElement('a');
-      a.href=`${url}?v=${Date.now()}`;
-      a.download='ac11-flyash-report.pdf';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-    })
-    .catch(()=>{
-      window.open(url,'_blank');
-    })
-    .finally(()=>{
-      setPdfBusy(false);
+  try{
+    if(!window.jspdf||!window.jspdf.jsPDF)throw new Error('jsPDF not available');
+    const jsPDF=window.jspdf.jsPDF;
+    const doc=new jsPDF({unit:'mm',format:'a4',orientation:'portrait'});
+    if(typeof doc.autoTable!=='function')throw new Error('autoTable plugin not available');
+
+    const c=calc();
+    const verdict=pdfVerdict(c);
+    const generatedAt=new Date().toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'});
+    const pageW=doc.internal.pageSize.getWidth();
+    const pageH=doc.internal.pageSize.getHeight();
+    const m=12;
+    let y=0;
+
+    const addHeader=(title,subtitle='')=>{
+      doc.setFillColor(217,104,36);
+      doc.rect(0,0,pageW,8,'F');
+      doc.setTextColor(255,255,255);
+      doc.setFont('helvetica','bold');
+      doc.setFontSize(7.5);
+      doc.text('AC11 - FLY ASH BRICK PROFITABILITY NAVIGATOR',m,5.2);
+      doc.setTextColor(15,23,42);
+      doc.setFontSize(15);
+      doc.text(title,m,15);
+      if(subtitle){
+        doc.setFont('helvetica','normal');
+        doc.setTextColor(100,116,139);
+        doc.setFontSize(9.5);
+        doc.text(subtitle,m,20.5);
+      }
+      return subtitle?25:22;
+    };
+
+    const setTableTheme=(headFill=[237,242,250])=>({
+      theme:'grid',
+      styles:{font:'helvetica',fontSize:8,textColor:[100,116,139],lineColor:[215,225,239],lineWidth:0.2,cellPadding:2},
+      headStyles:{fillColor:headFill,textColor:[15,23,42],fontStyle:'bold',fontSize:8},
+      alternateRowStyles:{fillColor:[255,255,255]},
+      margin:{left:m,right:m},
     });
+
+    y=addHeader('Dynamic PDF Report','Values reflect current slider settings at export time');
+    doc.setFont('helvetica','normal');
+    doc.setTextColor(100,116,139);
+    doc.setFontSize(8.5);
+    doc.text(`Generated ${generatedAt}`,m,y);
+    y+=3.5;
+
+    doc.autoTable({
+      startY:y+2,
+      ...setTableTheme([236,253,245]),
+      head:[['Executive Metric','Value','Note']],
+      body:[
+        ['Expected EBIT',fC(c.ebit),c.ebit>=0?'Profitable (absorption)':'Negative EBIT risk'],
+        ['Break-even output',`${fN(c.bepU)} units`,`${fP(c.cBep)} of capacity`],
+        ['Contribution margin',`Rs ${c.cm.toFixed(2)} / unit`,`${fP(c.cmR)} CM ratio`],
+        ['Target feasibility',c.tgtU<=CAP?'Capacity fit':'Capacity exceeded',`${fN(c.tgtU)} units needed`],
+      ],
+      columnStyles:{0:{cellWidth:50},1:{cellWidth:45,fontStyle:'bold',textColor:[15,23,42]},2:{cellWidth:'auto'}},
+    });
+    y=doc.lastAutoTable.finalY+4;
+
+    doc.autoTable({
+      startY:y,
+      ...setTableTheme(),
+      head:[['Assumption','Value']],
+      body:[
+        ['Selling price per brick',`Rs ${S.price.toFixed(2)}`],
+        ['Variable cost per brick',`Rs ${S.vc.toFixed(2)}`],
+        ['Annual sales volume',`${fN(S.volume)} bricks`],
+        ['Annual fixed operating',fC(S.fc)],
+        ['Target income',fC(S.ti)],
+        ['Depreciation (SLM)',fC(DEP)],
+        ['Loan interest',fC(INT)],
+      ],
+      columnStyles:{0:{cellWidth:80},1:{fontStyle:'bold',textColor:[15,23,42]}},
+    });
+
+    doc.addPage();
+    y=addHeader('Cost Model, Q1-Q3');
+
+    doc.autoTable({
+      startY:y,
+      ...setTableTheme(),
+      head:[['Fixed Cost Item','Monthly (Rs)','Annual (Rs)']],
+      body:FIXED.map(r=>[r.l,fC(r.a),fC(r.a*12)]).concat([['Total fixed operating',fC(fmTotal),fC(fmTotal*12)]]),
+      columnStyles:{0:{cellWidth:92},1:{halign:'right'},2:{halign:'right'}},
+    });
+    y=doc.lastAutoTable.finalY+4;
+
+    doc.autoTable({
+      startY:y,
+      ...setTableTheme(),
+      head:[['Variable Cost Item','Per Batch (Rs)','Per Brick (Rs)']],
+      body:VAR.map(r=>[r.l,fC(r.a),(r.a/BATCH).toFixed(2)]).concat([['Total variable cost',fC(vbTotal),(vbTotal/BATCH).toFixed(2)]]),
+      columnStyles:{0:{cellWidth:92},1:{halign:'right'},2:{halign:'right'}},
+    });
+    y=doc.lastAutoTable.finalY+4;
+
+    doc.autoTable({
+      startY:y,
+      ...setTableTheme([255,251,235]),
+      head:[['EBIT Build-up','Amount']],
+      body:[
+        ['Revenue',fC(c.rev)],
+        ['Less: Variable costs',`(${fC(c.vCost)})`],
+        ['Gross profit',fC(c.gp)],
+        ['Less: Fixed + depreciation',`(${fC(c.fAbs)})`],
+        ['EBIT (absorption)',fC(c.ebit)],
+        ['Less: Interest',`(${fC(INT)})`],
+        ['Net after interest',fC(c.net)],
+      ],
+      columnStyles:{0:{cellWidth:92},1:{halign:'right',fontStyle:'bold',textColor:[15,23,42]}},
+    });
+
+    doc.addPage();
+    y=addHeader('Q4-Q7: CVP and Recommendation');
+
+    const chartPng=await chartSvgToPngDataUrl();
+    if(chartPng){
+      const chartW=pageW-(m*2);
+      const chartH=78;
+      doc.setDrawColor(215,225,239);
+      doc.setFillColor(244,247,252);
+      doc.roundedRect(m,y,chartW,chartH,2,2,'FD');
+      doc.addImage(chartPng,'PNG',m+1.5,y+1.5,chartW-3,chartH-3);
+      y+=chartH+4;
+    }
+
+    doc.autoTable({
+      startY:y,
+      ...setTableTheme([239,246,255]),
+      head:[['Q4/Q5 Metric','Value','Interpretation']],
+      body:[
+        ['BEP units',`${fN(c.bepU)} bricks`,`${fP(c.cBep)} of capacity`],
+        ['BEP revenue',fC(c.bepR),`At price Rs ${S.price.toFixed(2)}`],
+        ['Margin of safety',`${fN(c.mosU)} bricks`,`${fP(c.mosP)} of expected sales`],
+        ['Units for target income',`${fN(c.tgtU)} bricks`,`${fP(c.cTgt)} of capacity`],
+      ],
+      columnStyles:{0:{cellWidth:56},1:{cellWidth:42,fontStyle:'bold',textColor:[15,23,42]},2:{cellWidth:'auto'}},
+    });
+    y=doc.lastAutoTable.finalY+6;
+
+    const toneMap={
+      good:[18,148,95],
+      bad:[201,63,63],
+      warn:[168,109,5],
+    };
+    const tone=toneMap[verdict.tone]||toneMap.good;
+    const boxH=28;
+    doc.setDrawColor(tone[0],tone[1],tone[2]);
+    doc.setFillColor(248,250,252);
+    doc.roundedRect(m,y,pageW-(m*2),boxH,2.5,2.5,'FD');
+    doc.setFillColor(tone[0],tone[1],tone[2]);
+    doc.rect(m,y,pageW-(m*2),1.2,'F');
+    doc.setFont('helvetica','bold');
+    doc.setTextColor(tone[0],tone[1],tone[2]);
+    doc.setFontSize(11);
+    doc.text(verdict.title,m+3,y+7);
+    doc.setFont('helvetica','normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(100,116,139);
+    const bodyLines=doc.splitTextToSize(verdict.body,pageW-(m*2)-6);
+    doc.text(bodyLines,m+3,y+12);
+    y+=boxH+5;
+
+    const bullets=[
+      `EBIT (absorption): ${fC(c.ebit)}`,
+      `Break-even price at current volume: Rs ${c.rqP.toFixed(2)}`,
+      `Or reduce VC to: Rs ${c.rqV.toFixed(2)} while keeping current price`,
+      `BEP requires ${fP(c.cBep)} of annual capacity`,
+      `Target income requires ${fN(c.tgtU)} bricks (${fP(c.cTgt)} of capacity)`,
+    ];
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(9);
+    doc.setTextColor(15,23,42);
+    doc.text('Financial Drivers',m,y);
+    y+=4.5;
+    doc.setFont('helvetica','normal');
+    doc.setTextColor(100,116,139);
+    bullets.forEach(item=>{
+      const lines=doc.splitTextToSize(`- ${item}`,pageW-(m*2)-2);
+      if(y+6>pageH-16){
+        doc.addPage();
+        y=addHeader('Q4-Q7: Financial Drivers (cont.)');
+      }
+      doc.text(lines,m+1,y);
+      y+=lines.length*4.2;
+    });
+
+    const pages=doc.getNumberOfPages();
+    for(let i=1;i<=pages;i++){
+      doc.setPage(i);
+      doc.setDrawColor(215,225,239);
+      doc.line(m,pageH-10,pageW-m,pageH-10);
+      doc.setFont('helvetica','normal');
+      doc.setFontSize(7);
+      doc.setTextColor(148,163,184);
+      doc.text(`Generated ${generatedAt} · Price Rs ${S.price.toFixed(2)} · VC Rs ${S.vc.toFixed(2)} · Volume ${fN(S.volume)}`,m,pageH-6.3);
+      doc.text(`Page ${i}/${pages}`,pageW-m,pageH-6.3,{align:'right'});
+    }
+
+    doc.save(`ac11-flyash-report-${new Date().toISOString().slice(0,10)}.pdf`);
+  }catch(err){
+    console.error('Dynamic PDF generation failed:',err);
+    alert('Dynamic PDF generation failed. Downloading backup PDF.');
+    window.open(`/ac11-flyash-report.pdf?v=${Date.now()}`,'_blank');
+  }finally{
+    setPdfBusy(false);
+  }
 }
 
 /* ═══════════════════════════ SLIDER ═══════════════════════════ */
